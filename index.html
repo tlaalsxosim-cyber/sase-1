@@ -329,6 +329,15 @@
   .restore-item button:hover{border-color:var(--accent);color:var(--accent);}
   .restore-empty{font-size:.78rem;color:var(--text-faint);margin-top:10px;}
 
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);
+    background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;
+    font-size:.82rem;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;z-index:80;max-width:calc(100vw - 32px);text-align:center;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
   @media (min-width:760px){
     .list-head{display:grid;}
     .row .c-status{justify-content:flex-start;}
@@ -443,6 +452,8 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 let DATA = [];
 let loadError = false;
@@ -474,6 +485,8 @@ function fmtDate(d){
   return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
 }
 
+let currentVersion = null;
+
 async function loadData(){
   const asOfEl = document.getElementById('asOfText');
   const footEl = document.getElementById('footText');
@@ -482,6 +495,7 @@ async function loadData(){
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const lastMod = res.headers.get('last-modified');
     DATA = await res.json();
+    currentVersion = lastMod ? new Date(lastMod).getTime() : currentVersion;
     asOfEl.textContent = lastMod ? `최종 업데이트 ${fmtDate(new Date(lastMod))}` : '';
     footEl.textContent = `평택센터 파렛트 적재 기준 원본 기반 · 총 ${DATA.length}개 품목`;
   } catch (e) {
@@ -493,6 +507,34 @@ async function loadData(){
   deriveFields(DATA);
   render();
 }
+
+let toastTimer = null;
+function showToast(text){
+  const el = document.getElementById('toast');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+async function checkForUpdates(){
+  try {
+    const res = await fetch('/api/meta', { cache: 'no-store' });
+    if (!res.ok) return;
+    const json = await res.json();
+    if (!json.uploadedAt) return;
+    const t = new Date(json.uploadedAt).getTime();
+    if (currentVersion !== null && t !== currentVersion) {
+      await loadData();
+      showToast('다른 사람이 데이터를 업데이트해서 새로고침했습니다');
+    }
+  } catch (e) { /* 폴링 중 네트워크 오류는 조용히 무시 */ }
+}
+
+setInterval(checkForUpdates, 20000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForUpdates();
+});
 
 const state = { q:'', status:'all', pallet:'all', sort:'no' };
 
