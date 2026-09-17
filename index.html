@@ -310,6 +310,24 @@
     position:absolute;top:14px;right:14px;border:none;background:var(--surface-2);color:var(--text);
     width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.9rem;
   }
+  .link-btn{
+    background:none;border:none;color:var(--accent);font-family:inherit;font-size:.8rem;
+    cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;
+  }
+  .restore-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+  .restore-list{margin-top:10px;max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+  .restore-item{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:var(--surface-2);border-radius:8px;padding:8px 10px;font-size:.78rem;
+  }
+  .restore-item .r-time{font-family:'IBM Plex Mono',monospace;color:var(--text);}
+  .restore-item .r-size{color:var(--text-faint);font-size:.72rem;margin-left:6px;}
+  .restore-item button{
+    font-family:inherit;font-size:.72rem;padding:4px 10px;border-radius:6px;cursor:pointer;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text);flex-shrink:0;
+  }
+  .restore-item button:hover{border-color:var(--accent);color:var(--accent);}
+  .restore-empty{font-size:.78rem;color:var(--text-faint);margin-top:10px;}
 
   @media (min-width:760px){
     .list-head{display:grid;}
@@ -417,6 +435,11 @@
   <div class="actions">
     <button class="btn" id="uploadCancelBtn" type="button">취소</button>
     <button class="btn primary" id="uploadSubmitBtn" type="button" disabled>업데이트 적용</button>
+  </div>
+
+  <div class="restore-section">
+    <button class="link-btn" id="restoreToggleBtn" type="button">이전 버전으로 되돌리기</button>
+    <div class="restore-list" id="restoreList" hidden></div>
   </div>
 </div>
 
@@ -740,6 +763,8 @@ function closeUploadModal(){
   uploadSubmitBtn.disabled = true;
   uploadSubmitBtn.textContent = '업데이트 적용';
   clearStatus();
+  restoreList.hidden = true;
+  restoreList.innerHTML = '';
 }
 function onUploadKeydown(e){ if (e.key === 'Escape') closeUploadModal(); }
 
@@ -796,6 +821,68 @@ uploadSubmitBtn.addEventListener('click', async () => {
     uploadSubmitBtn.textContent = '업데이트 적용';
   }
 });
+
+// 이전 버전으로 되돌리기
+const restoreToggleBtn = document.getElementById('restoreToggleBtn');
+const restoreList = document.getElementById('restoreList');
+
+function fmtDateTime(iso){
+  const d = new Date(iso);
+  return fmtDate(d) + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+async function loadBackupList(){
+  restoreList.innerHTML = '<div class="restore-empty">불러오는 중…</div>';
+  try {
+    const res = await fetch('/api/backups', { cache: 'no-store' });
+    const json = await res.json();
+    if (!res.ok || !json.ok) throw new Error(json.error || '목록을 불러오지 못했습니다.');
+    if (!json.backups.length) {
+      restoreList.innerHTML = '<div class="restore-empty">저장된 이전 버전이 없습니다.</div>';
+      return;
+    }
+    restoreList.innerHTML = json.backups.map(b => `
+      <div class="restore-item">
+        <span><span class="r-time">${fmtDateTime(b.uploadedAt)}</span><span class="r-size">${Math.round(b.size/1024)}KB</span></span>
+        <button type="button" data-pathname="${escapeAttr(b.pathname)}">복원</button>
+      </div>
+    `).join('');
+    restoreList.querySelectorAll('button[data-pathname]').forEach(btn => {
+      btn.addEventListener('click', () => restoreBackup(btn.dataset.pathname, btn));
+    });
+  } catch (e) {
+    restoreList.innerHTML = `<div class="restore-empty">${escapeHtml(e.message)}</div>`;
+  }
+}
+
+restoreToggleBtn.addEventListener('click', () => {
+  const willShow = restoreList.hidden;
+  restoreList.hidden = !willShow;
+  if (willShow) loadBackupList();
+});
+
+async function restoreBackup(pathname, btn){
+  if (!confirm('이 시점으로 되돌리면 현재 데이터가 이 버전으로 교체됩니다. 계속할까요?')) return;
+  btn.disabled = true;
+  btn.textContent = '복원 중…';
+  setStatus('busy', '이전 버전으로 되돌리는 중입니다…');
+  try {
+    const res = await fetch('/api/restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pathname }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) throw new Error(json.error || '복원에 실패했습니다.');
+    setStatus('ok', `복원 완료 · 총 ${json.count}건`);
+    await loadData();
+    await loadBackupList();
+  } catch (e) {
+    setStatus('err', e.message || '복원 중 오류가 발생했습니다.');
+    btn.disabled = false;
+    btn.textContent = '복원';
+  }
+}
 
 loadData();
 </script>
