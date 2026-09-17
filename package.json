@@ -1,0 +1,25 @@
+{
+  "name": "sase-1",
+  "version": "1.0.0",
+  "description": "평택센터 파렛트 적재 상품 마스터 및 조회 앱",
+  "main": "index.js",
+  "scripts": {
+    "data": "node scripts/build-master.js",
+    "deploy": "vercel --prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tlaalsxosim-cyber/sase-1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tlaalsxosim-cyber/sase-1/issues"
+  },
+  "homepage": "https://github.com/tlaalsxosim-cyber/sase-1#readme",
+  "dependencies": {
+    "xlsx-js-style": "^1.2.0"
+  }
+}

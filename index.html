@@ -1,0 +1,616 @@
+<title>파렛트 적재 대장</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F4EE;
+    --surface:#FFFFFF;
+    --surface-2:#EAECE3;
+    --border:#D7D9CC;
+    --border-strong:#B9BCA8;
+    --text:#1C201B;
+    --text-muted:#5C6156;
+    --text-faint:#8A8F80;
+    --accent:#1F5266;
+    --accent-strong:#153A49;
+    --accent-soft:#DCE7EA;
+    --good:#2E7D4F;
+    --good-soft:#E1F0E4;
+    --warn:#9C6B12;
+    --warn-soft:#F6E9CE;
+    --bad:#AD3A2C;
+    --bad-soft:#F7E2DE;
+    --shadow: 0 8px 24px rgba(28,32,27,0.10);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14181A;
+      --surface:#1B2022;
+      --surface-2:#22282A;
+      --border:#343B3B;
+      --border-strong:#454D4C;
+      --text:#E9EBE4;
+      --text-muted:#A4AB9E;
+      --text-faint:#767D72;
+      --accent:#7FC1D6;
+      --accent-strong:#A6D8E8;
+      --accent-soft:#233A41;
+      --good:#7BCE9C;
+      --good-soft:#1D3327;
+      --warn:#E3B45C;
+      --warn-soft:#3A2E17;
+      --bad:#E58E7E;
+      --bad-soft:#3B241F;
+      --shadow: 0 10px 28px rgba(0,0,0,0.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14181A;
+    --surface:#1B2022;
+    --surface-2:#22282A;
+    --border:#343B3B;
+    --border-strong:#454D4C;
+    --text:#E9EBE4;
+    --text-muted:#A4AB9E;
+    --text-faint:#767D72;
+    --accent:#7FC1D6;
+    --accent-strong:#A6D8E8;
+    --accent-soft:#233A41;
+    --good:#7BCE9C;
+    --good-soft:#1D3327;
+    --warn:#E3B45C;
+    --warn-soft:#3A2E17;
+    --bad:#E58E7E;
+    --bad-soft:#3B241F;
+    --shadow: 0 10px 28px rgba(0,0,0,0.45);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans KR', 'Noto Sans KR', system-ui, sans-serif;
+    padding-inline:0;
+    min-height:100%;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 56px;}
+  ::selection{background:var(--accent-soft);}
+
+  .mono{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-variant-numeric:tabular-nums;}
+  .serif{font-family:'Noto Serif KR', serif;}
+
+  header.top{
+    position:sticky;
+    top:env(safe-area-inset-top,0px);
+    z-index:30;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .top-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
+  .brand .mark{
+    font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.28rem;letter-spacing:-.01em;
+  }
+  .brand .site-tag{
+    font-size:.68rem;color:var(--text-faint);letter-spacing:.08em;text-transform:uppercase;
+    border-left:1px solid var(--border-strong); padding-left:10px;
+  }
+  .search-box{
+    position:relative;flex:1;min-width:200px;max-width:520px;
+  }
+  .search-box input{
+    width:100%;padding:10px 14px 10px 38px;border-radius:9px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);font-size:.92rem;font-family:inherit;
+  }
+  .search-box input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.55;pointer-events:none;}
+  .search-box .clear-btn{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    border:none;background:none;color:var(--text-faint);cursor:pointer;padding:6px;border-radius:6px;
+    display:none;font-size:.8rem;
+  }
+  .search-box .clear-btn:hover{background:var(--surface-2);color:var(--text);}
+
+  main{padding-top:22px;}
+
+  .hero-line{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+  .hero-line h1{font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.7rem;margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
+  .hero-line p{margin:0;color:var(--text-muted);font-size:.86rem;max-width:52ch;}
+  .as-of{font-size:.72rem;color:var(--text-faint);text-align:right;white-space:nowrap;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  .stat-btn{
+    text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:10px;
+    padding:12px 14px;cursor:pointer;font-family:inherit;color:var(--text);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .stat-btn:hover{border-color:var(--border-strong);}
+  .stat-btn.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  .stat-btn .num{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;display:block;line-height:1.1;}
+  .stat-btn .lbl{font-size:.74rem;color:var(--text-muted);margin-top:3px;display:block;}
+  .stat-btn[data-status="all"] .num{color:var(--text);}
+  .stat-btn[data-status="사용중"] .num{color:var(--good);}
+  .stat-btn[data-status="단종예정"] .num{color:var(--warn);}
+  .stat-btn[data-status="단종"] .num{color:var(--bad);}
+
+  .toolbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;
+    padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  }
+  .toolbar label{font-size:.72rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .toolbar select{
+    font-family:inherit;font-size:.84rem;padding:6px 10px;border-radius:7px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);
+  }
+  .result-count{margin-left:auto;font-size:.78rem;color:var(--text-muted);}
+  .result-count b{color:var(--text);font-family:'IBM Plex Mono',monospace;}
+
+  .list-head{
+    display:none;
+    grid-template-columns: 1.5fr 3fr 1fr 1.6fr 1.3fr 1fr;
+    gap:10px;padding:8px 14px;font-size:.7rem;color:var(--text-faint);
+    text-transform:uppercase;letter-spacing:.06em;
+  }
+  .rows{display:flex;flex-direction:column;gap:8px;}
+  .row{
+    display:grid;
+    grid-template-columns: 1.5fr 3fr 1fr 1.6fr 1.3fr 1fr;
+    gap:10px;align-items:center;
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;cursor:pointer;text-align:left;font-family:inherit;color:var(--text);
+    transition:border-color .12s ease, transform .12s ease;
+  }
+  .row:hover{border-color:var(--border-strong);}
+  .row:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .row .c-code{font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-weight:500;word-break:break-all;}
+  .row .c-name{font-size:.86rem;line-height:1.35;}
+  .row .c-name .maker{color:var(--text-faint);font-size:.74rem;display:block;margin-top:2px;}
+  .row .c-pallet{font-size:.72rem;}
+  .row .c-qty{font-family:'IBM Plex Mono',monospace;font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;}
+  .row .c-pattern{font-size:.78rem;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;}
+  .row .c-status{display:flex;justify-content:flex-end;}
+
+  .lbl-mobile{display:none;font-size:.64rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    font-size:.72rem;font-weight:500;white-space:nowrap;
+  }
+  .badge.b-neutral{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);}
+  .badge.b-good{background:var(--good-soft);color:var(--good);}
+  .badge.b-warn{background:var(--warn-soft);color:var(--warn);}
+  .badge.b-bad{background:var(--bad-soft);color:var(--bad);}
+  .badge.b-accent{background:var(--accent-soft);color:var(--accent-strong);}
+
+  .qty-chip{background:var(--surface-2);border-radius:6px;padding:2px 6px;font-size:.76rem;}
+  .qty-chip .u{color:var(--text-faint);font-size:.68rem;margin-right:2px;}
+
+  .empty-state{
+    text-align:center;padding:64px 20px;color:var(--text-muted);
+  }
+  .empty-state .big{font-size:2rem;margin-bottom:8px;}
+  .empty-state button{
+    margin-top:14px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);
+    padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.84rem;
+  }
+
+  /* detail panel */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,12,10,.38);z-index:60;
+    opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+
+  .panel{
+    position:fixed;top:0;right:0;height:100%;width:420px;max-width:92vw;
+    background:var(--surface);border-left:1px solid var(--border);z-index:61;
+    box-shadow:var(--shadow);
+    transform:translateX(100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .panel.open{transform:translateX(0);}
+  .panel-inner{overflow-y:auto;padding:22px 22px 32px;flex:1;}
+  .panel-close{
+    position:absolute;top:16px;right:16px;border:none;background:var(--surface-2);color:var(--text);
+    width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .panel-close:hover{background:var(--border);}
+  .panel .p-eyebrow{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+  .panel .p-code{font-family:'IBM Plex Mono',monospace;font-size:1.05rem;font-weight:600;word-break:break-all;padding-right:40px;}
+  .panel .p-name{font-family:'Noto Serif KR',serif;font-size:1.18rem;font-weight:600;margin:8px 0 14px;line-height:1.4;text-wrap:balance;}
+  .panel .p-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+
+  .p-section{margin-bottom:18px;}
+  .p-section h3{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;}
+
+  .qty-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .qty-tile{background:var(--surface-2);border-radius:10px;padding:12px 14px;border:1px solid var(--border);}
+  .qty-tile.dim{opacity:.4;}
+  .qty-tile .t-lbl{font-size:.7rem;color:var(--text-muted);}
+  .qty-tile .t-val{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;line-height:1.2;}
+  .qty-tile .t-unit{font-size:.72rem;color:var(--text-faint);}
+
+  .info-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--border);font-size:.86rem;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row .k{color:var(--text-muted);flex-shrink:0;}
+  .info-row .v{text-align:right;font-family:'IBM Plex Mono',monospace;}
+
+  .remark-box{
+    background:var(--surface-2);border-radius:10px;padding:12px 14px;font-size:.84rem;line-height:1.6;
+    white-space:pre-wrap;color:var(--text);
+  }
+  .copy-btn{
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text-muted);
+    padding:4px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;font-family:inherit;margin-left:8px;
+  }
+  .copy-btn:hover{color:var(--text);border-color:var(--accent);}
+  .copy-btn.copied{color:var(--good);border-color:var(--good);}
+
+  footer.foot{max-width:1180px;margin:36px auto 0;padding:0 20px;color:var(--text-faint);font-size:.72rem;text-align:center;}
+
+  @media (min-width:760px){
+    .list-head{display:grid;}
+    .row .c-status{justify-content:flex-start;}
+  }
+  @media (max-width:759px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .row{grid-template-columns:1fr;gap:6px;padding:14px;}
+    .row .c-status{position:absolute;top:14px;right:14px;}
+    .row{position:relative;}
+    .lbl-mobile{display:block;}
+    .row .c-qty{margin-top:2px;}
+    .panel{width:100%;max-width:100%;top:auto;bottom:0;height:88%;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;transform:translateY(100%);}
+    .panel.open{transform:translateY(0);}
+    .qty-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark">파렛트 적재 대장</span>
+      <span class="site-tag">평택센터 · 냉동/축산</span>
+    </div>
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="품번, 품명, 제조사, 비고로 검색" autocomplete="off">
+      <button class="clear-btn" id="clearSearch" type="button" aria-label="검색어 지우기">✕</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero-line">
+    <div>
+      <h1>파렛트 적재 대장</h1>
+      <p>평택센터 품목별 파렛트(N11형·N12형) 적재수량과 박스규격을 검색·조회합니다.</p>
+    </div>
+    <div class="as-of" id="asOfText">데이터 불러오는 중…</div>
+  </div>
+
+  <div class="stats" id="statTiles"></div>
+
+  <div class="toolbar">
+    <label>파렛트타입
+      <select id="palletFilter">
+        <option value="all">전체</option>
+        <option value="N11형">N11형</option>
+        <option value="N12형">N12형</option>
+        <option value="공통(교차사용)">공통(교차사용)</option>
+        <option value="미기재">미기재</option>
+      </select>
+    </label>
+    <label>정렬
+      <select id="sortSelect">
+        <option value="no">기본순</option>
+        <option value="code">품번 가나다순</option>
+        <option value="name">품명 가나다순</option>
+        <option value="qtyDesc">적재수량 많은순</option>
+        <option value="qtyAsc">적재수량 적은순</option>
+      </select>
+    </label>
+    <span class="result-count"><b id="resultCount">0</b>건 표시 중</span>
+  </div>
+
+  <div class="list-head">
+    <span>품번</span><span>품명 / 제조사</span><span>파렛트타입</span><span>적재수량</span><span>적재기준</span><span>상태</span>
+  </div>
+
+  <div class="rows" id="rows">
+    <p style="padding:48px 0;text-align:center;color:var(--text-muted);font-size:.86rem;">불러오는 중…</p>
+  </div>
+
+  <div class="empty-state" id="emptyState" hidden>
+    <div class="big">🔍</div>
+    <span class="empty-msg">검색 조건에 맞는 품목이 없습니다.</span>
+    <div><button id="resetBtn" type="button">필터 초기화</button></div>
+  </div>
+</main>
+
+<footer class="foot" id="footText">평택센터 제품별 파렛트 적재 기준 원본 기반</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="품목 상세">
+  <button class="panel-close" id="panelClose" aria-label="닫기">✕</button>
+  <div class="panel-inner" id="panelInner"></div>
+</div>
+
+<script>
+let DATA = [];
+let loadError = false;
+
+function deriveFields(list){
+  list.forEach(d => {
+    const parseQty = v => {
+      if (v === '' || v === null || v === undefined) return null;
+      const n = parseInt(String(v).replace(/[^0-9-]/g,''), 10);
+      return Number.isFinite(n) ? n : null;
+    };
+    d.qtyN11 = parseQty(d.n11);
+    d.qtyN12 = parseQty(d.n12);
+    d.n11Raw = d.n11 === '' || d.n11 === undefined ? null : String(d.n11).trim();
+    d.n12Raw = d.n12 === '' || d.n12 === undefined ? null : String(d.n12).trim();
+    const vals = [d.qtyN11, d.qtyN12].filter(v => v !== null);
+    d.repQty = vals.length ? Math.max(...vals) : null;
+
+    const m = String(d.pattern||'').match(/(\d+)\s*\*\s*(\d+)(?!.*\d\s*\*\s*\d)/);
+    d.patternCalc = m ? (parseInt(m[1],10) * parseInt(m[2],10)) : null;
+    d.patternDisplay = d.pattern ? d.pattern.replace(/\*/g, '×') : '';
+
+    d.boxDisplay = d.box ? d.box.replace(/\*/g, ' × ') + ' mm' : '';
+    d.search = [d.code, d.name, d.maker, d.remark, d.status].join(' ').toLowerCase();
+  });
+}
+
+function fmtDate(d){
+  return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+}
+
+async function loadData(){
+  const asOfEl = document.getElementById('asOfText');
+  const footEl = document.getElementById('footText');
+  try {
+    const res = await fetch('./products.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const lastMod = res.headers.get('last-modified');
+    DATA = await res.json();
+    asOfEl.textContent = lastMod ? `최종 업데이트 ${fmtDate(new Date(lastMod))}` : '';
+    footEl.textContent = `평택센터 파렛트 적재 기준 원본 기반 · 총 ${DATA.length}개 품목`;
+  } catch (e) {
+    loadError = true;
+    DATA = [];
+    asOfEl.textContent = '';
+    footEl.textContent = '데이터를 불러오지 못했습니다';
+  }
+  deriveFields(DATA);
+  render();
+}
+
+const state = { q:'', status:'all', pallet:'all', sort:'no' };
+
+const STATUS_ORDER = ['all','사용중','단종예정','단종'];
+const STATUS_LABEL = { all:'전체', '사용중':'사용중', '단종예정':'단종예정', '단종':'단종' };
+
+function statusBadgeClass(s){
+  if (s === '사용중') return 'b-good';
+  if (s === '단종예정') return 'b-warn';
+  if (s === '단종') return 'b-bad';
+  return 'b-neutral';
+}
+
+const statTilesEl = document.getElementById('statTiles');
+function renderStatTiles(){
+  const counts = { all: DATA.length, '사용중':0, '단종예정':0, '단종':0 };
+  DATA.forEach(d => { counts[d.status] = (counts[d.status]||0) + 1; });
+  statTilesEl.innerHTML = STATUS_ORDER.map(s => `
+    <button class="stat-btn ${state.status===s?'active':''}" data-status="${s}" type="button">
+      <span class="num mono">${counts[s]||0}</span>
+      <span class="lbl">${STATUS_LABEL[s]}</span>
+    </button>
+  `).join('');
+  statTilesEl.querySelectorAll('.stat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.status = btn.dataset.status;
+      render();
+    });
+  });
+}
+
+function qtyChipsHTML(d){
+  const chips = [];
+  if (d.qtyN11 !== null) chips.push(`<span class="qty-chip"><span class="u">N11</span>${d.n11Raw}</span>`);
+  if (d.qtyN12 !== null) chips.push(`<span class="qty-chip"><span class="u">N12</span>${d.n12Raw}</span>`);
+  if (!chips.length) return '<span style="color:var(--text-faint)">–</span>';
+  return chips.join(' ');
+}
+
+const rowsEl = document.getElementById('rows');
+const emptyStateEl = document.getElementById('emptyState');
+const resultCountEl = document.getElementById('resultCount');
+
+function getFiltered(){
+  let list = DATA.filter(d => {
+    if (state.status !== 'all' && d.status !== state.status) return false;
+    if (state.pallet !== 'all' && d.palletType !== state.pallet) return false;
+    if (state.q && !d.search.includes(state.q)) return false;
+    return true;
+  });
+  const bySort = {
+    no: (a,b) => a.no - b.no,
+    code: (a,b) => a.code.localeCompare(b.code, 'ko'),
+    name: (a,b) => a.name.localeCompare(b.name, 'ko'),
+    qtyDesc: (a,b) => (b.repQty ?? -1) - (a.repQty ?? -1),
+    qtyAsc: (a,b) => (a.repQty ?? 9999) - (b.repQty ?? 9999),
+  };
+  list.sort(bySort[state.sort] || bySort.no);
+  return list;
+}
+
+function render(){
+  renderStatTiles();
+  const list = getFiltered();
+  resultCountEl.textContent = list.length;
+
+  if (!list.length){
+    rowsEl.innerHTML = '';
+    emptyStateEl.hidden = false;
+    emptyStateEl.querySelector('.empty-msg').textContent = loadError
+      ? '데이터를 불러오지 못했습니다. products.json을 확인해 주세요.'
+      : '검색 조건에 맞는 품목이 없습니다.';
+    emptyStateEl.querySelector('.big').textContent = loadError ? '⚠️' : '🔍';
+    return;
+  }
+  emptyStateEl.hidden = true;
+
+  rowsEl.innerHTML = list.map(d => `
+    <button class="row" data-code="${escapeAttr(d.code)}" type="button">
+      <span class="c-code mono">${escapeHtml(d.code)}</span>
+      <span class="c-name">
+        ${escapeHtml(d.name)}
+        ${d.maker ? `<span class="maker">${escapeHtml(d.maker)}</span>` : ''}
+      </span>
+      <span class="c-pallet">
+        <span class="lbl-mobile">파렛트타입</span>
+        <span class="badge b-accent">${d.palletType}</span>
+      </span>
+      <span class="c-qty">
+        <span class="lbl-mobile">적재수량</span>
+        ${qtyChipsHTML(d)}
+      </span>
+      <span class="c-pattern">
+        <span class="lbl-mobile">적재기준</span>
+        ${d.patternDisplay ? d.patternDisplay + (d.patternCalc ? ` (${d.patternCalc})` : '') : '–'}
+      </span>
+      <span class="c-status">
+        <span class="badge ${statusBadgeClass(d.status)}">${d.status}</span>
+      </span>
+    </button>
+  `).join('');
+
+  rowsEl.querySelectorAll('.row').forEach(btn => {
+    btn.addEventListener('click', () => openPanel(btn.dataset.code));
+  });
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+// search
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearch');
+searchInput.addEventListener('input', () => {
+  state.q = searchInput.value.trim().toLowerCase();
+  clearSearchBtn.style.display = state.q ? 'block' : 'none';
+  render();
+});
+clearSearchBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  state.q = '';
+  clearSearchBtn.style.display = 'none';
+  searchInput.focus();
+  render();
+});
+
+document.getElementById('palletFilter').addEventListener('change', e => {
+  state.pallet = e.target.value; render();
+});
+document.getElementById('sortSelect').addEventListener('change', e => {
+  state.sort = e.target.value; render();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  state.q=''; state.status='all'; state.pallet='all'; state.sort='no';
+  searchInput.value=''; document.getElementById('palletFilter').value='all'; document.getElementById('sortSelect').value='no';
+  clearSearchBtn.style.display='none';
+  render();
+});
+
+// detail panel
+const overlay = document.getElementById('overlay');
+const panel = document.getElementById('panel');
+const panelInner = document.getElementById('panelInner');
+const panelClose = document.getElementById('panelClose');
+
+function openPanel(code){
+  const d = DATA.find(x => x.code === code);
+  if (!d) return;
+  panelInner.innerHTML = `
+    <div class="p-eyebrow">${escapeHtml(d.wh)}센터 · No.${d.no}</div>
+    <div class="p-code mono">${escapeHtml(d.code)}
+      <button class="copy-btn" id="copyCodeBtn" type="button">품번 복사</button>
+    </div>
+    <div class="p-name">${escapeHtml(d.name)}</div>
+    <div class="p-badges">
+      <span class="badge ${statusBadgeClass(d.status)}">${d.status}</span>
+      <span class="badge b-accent">${d.palletType}</span>
+      ${d.maker ? `<span class="badge b-neutral">${escapeHtml(d.maker)}</span>` : ''}
+    </div>
+
+    <div class="p-section">
+      <h3>파렛트타입별 적재수량</h3>
+      <div class="qty-grid">
+        <div class="qty-tile ${d.qtyN11===null?'dim':''}">
+          <div class="t-lbl">N11형 (1100×1100)</div>
+          <div class="t-val mono">${d.n11Raw ?? '–'}</div>
+          <div class="t-unit">box / pallet</div>
+        </div>
+        <div class="qty-tile ${d.qtyN12===null?'dim':''}">
+          <div class="t-lbl">N12형 (1200×1000)</div>
+          <div class="t-val mono">${d.n12Raw ?? '–'}</div>
+          <div class="t-unit">box / pallet</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-section">
+      <h3>적재 상세</h3>
+      <div class="info-row"><span class="k">적재기준</span><span class="v">${d.patternDisplay ? d.patternDisplay + (d.patternCalc?` = ${d.patternCalc}box`:'') : '–'}</span></div>
+      <div class="info-row"><span class="k">박스규격</span><span class="v">${d.boxDisplay || '–'}</span></div>
+      <div class="info-row"><span class="k">창고</span><span class="v">${escapeHtml(d.wh)}</span></div>
+      <div class="info-row"><span class="k">제조사</span><span class="v">${d.maker ? escapeHtml(d.maker) : '–'}</span></div>
+    </div>
+
+    ${d.remark ? `
+    <div class="p-section">
+      <h3>비고</h3>
+      <div class="remark-box">${escapeHtml(d.remark)}</div>
+    </div>` : ''}
+  `;
+
+  const copyBtn = document.getElementById('copyCodeBtn');
+  copyBtn.addEventListener('click', () => {
+    try {
+      navigator.clipboard.writeText(d.code).then(()=>{
+        copyBtn.textContent = '복사됨';
+        copyBtn.classList.add('copied');
+        setTimeout(()=>{ copyBtn.textContent='품번 복사'; copyBtn.classList.remove('copied'); }, 1500);
+      }).catch(()=>{});
+    } catch(e){}
+  });
+
+  overlay.classList.add('open');
+  panel.classList.add('open');
+  document.addEventListener('keydown', onKeydown);
+}
+
+function closePanel(){
+  overlay.classList.remove('open');
+  panel.classList.remove('open');
+  document.removeEventListener('keydown', onKeydown);
+}
+function onKeydown(e){ if (e.key === 'Escape') closePanel(); }
+
+overlay.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
+
+loadData();
+</script>
