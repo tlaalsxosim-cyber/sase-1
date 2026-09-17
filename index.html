@@ -1,45 +1,47 @@
 <title>파렛트 적재 대장</title>
+<link rel="icon" type="image/png" href="/image/sase-logo.png">
+<meta name="theme-color" content="#E31F26">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F3F4EE;
+    --bg:#FAF8F6;
     --surface:#FFFFFF;
-    --surface-2:#EAECE3;
-    --border:#D7D9CC;
-    --border-strong:#B9BCA8;
-    --text:#1C201B;
-    --text-muted:#5C6156;
-    --text-faint:#8A8F80;
-    --accent:#1F5266;
-    --accent-strong:#153A49;
-    --accent-soft:#DCE7EA;
+    --surface-2:#F2ECE7;
+    --border:#E2D9D1;
+    --border-strong:#CBBDB2;
+    --text:#211A17;
+    --text-muted:#6B5F58;
+    --text-faint:#9C9088;
+    --accent:#E31F26;
+    --accent-strong:#A8141B;
+    --accent-soft:#FBE2E1;
     --good:#2E7D4F;
     --good-soft:#E1F0E4;
-    --warn:#9C6B12;
-    --warn-soft:#F6E9CE;
-    --bad:#AD3A2C;
-    --bad-soft:#F7E2DE;
-    --shadow: 0 8px 24px rgba(28,32,27,0.10);
+    --warn:#8A6D00;
+    --warn-soft:#FBF0BE;
+    --bad:#9C3230;
+    --bad-soft:#F5E2DF;
+    --shadow: 0 8px 24px rgba(33,26,23,0.10);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#14181A;
-      --surface:#1B2022;
-      --surface-2:#22282A;
-      --border:#343B3B;
-      --border-strong:#454D4C;
-      --text:#E9EBE4;
-      --text-muted:#A4AB9E;
-      --text-faint:#767D72;
-      --accent:#7FC1D6;
-      --accent-strong:#A6D8E8;
-      --accent-soft:#233A41;
+      --bg:#181413;
+      --surface:#211B19;
+      --surface-2:#2A2321;
+      --border:#3D3532;
+      --border-strong:#514742;
+      --text:#F0E9E5;
+      --text-muted:#AFA39B;
+      --text-faint:#7D7369;
+      --accent:#FF6B63;
+      --accent-strong:#FF9B90;
+      --accent-soft:#3B211F;
       --good:#7BCE9C;
       --good-soft:#1D3327;
-      --warn:#E3B45C;
+      --warn:#E3C34C;
       --warn-soft:#3A2E17;
       --bad:#E58E7E;
       --bad-soft:#3B241F;
@@ -48,20 +50,20 @@
     }
   }
   :root[data-theme="dark"]{
-    --bg:#14181A;
-    --surface:#1B2022;
-    --surface-2:#22282A;
-    --border:#343B3B;
-    --border-strong:#454D4C;
-    --text:#E9EBE4;
-    --text-muted:#A4AB9E;
-    --text-faint:#767D72;
-    --accent:#7FC1D6;
-    --accent-strong:#A6D8E8;
-    --accent-soft:#233A41;
+    --bg:#181413;
+    --surface:#211B19;
+    --surface-2:#2A2321;
+    --border:#3D3532;
+    --border-strong:#514742;
+    --text:#F0E9E5;
+    --text-muted:#AFA39B;
+    --text-faint:#7D7369;
+    --accent:#FF6B63;
+    --accent-strong:#FF9B90;
+    --accent-soft:#3B211F;
     --good:#7BCE9C;
     --good-soft:#1D3327;
-    --warn:#E3B45C;
+    --warn:#E3C34C;
     --warn-soft:#3A2E17;
     --bad:#E58E7E;
     --bad-soft:#3B241F;
@@ -91,8 +93,17 @@
     backdrop-filter:saturate(140%) blur(10px);
     border-bottom:1px solid var(--border);
   }
-  .top-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-  .brand{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
+  header.top::after{
+    content:'';display:block;height:3px;
+    background:linear-gradient(90deg, var(--accent) 0%, var(--accent) 55%, #E1D200 100%);
+  }
+  .top-inner{max-width:1180px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .brand .logo-chip{
+    display:flex;align-items:center;background:#fff;border-radius:7px;padding:4px 9px;
+    border:1px solid var(--border);flex-shrink:0;
+  }
+  .brand .logo-chip img{height:18px;width:auto;display:block;}
   .brand .mark{
     font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.28rem;letter-spacing:-.01em;
   }
@@ -276,6 +287,7 @@
 <header class="top">
   <div class="top-inner">
     <div class="brand">
+      <span class="logo-chip"><img src="/image/sase-logo.png" alt="SASE"></span>
       <span class="mark">파렛트 적재 대장</span>
       <span class="site-tag">평택센터 · 냉동/축산</span>
     </div>
