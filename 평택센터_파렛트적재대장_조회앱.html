@@ -1,0 +1,583 @@
+<title>파렛트 적재 대장</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F4EE;
+    --surface:#FFFFFF;
+    --surface-2:#EAECE3;
+    --border:#D7D9CC;
+    --border-strong:#B9BCA8;
+    --text:#1C201B;
+    --text-muted:#5C6156;
+    --text-faint:#8A8F80;
+    --accent:#1F5266;
+    --accent-strong:#153A49;
+    --accent-soft:#DCE7EA;
+    --good:#2E7D4F;
+    --good-soft:#E1F0E4;
+    --warn:#9C6B12;
+    --warn-soft:#F6E9CE;
+    --bad:#AD3A2C;
+    --bad-soft:#F7E2DE;
+    --shadow: 0 8px 24px rgba(28,32,27,0.10);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14181A;
+      --surface:#1B2022;
+      --surface-2:#22282A;
+      --border:#343B3B;
+      --border-strong:#454D4C;
+      --text:#E9EBE4;
+      --text-muted:#A4AB9E;
+      --text-faint:#767D72;
+      --accent:#7FC1D6;
+      --accent-strong:#A6D8E8;
+      --accent-soft:#233A41;
+      --good:#7BCE9C;
+      --good-soft:#1D3327;
+      --warn:#E3B45C;
+      --warn-soft:#3A2E17;
+      --bad:#E58E7E;
+      --bad-soft:#3B241F;
+      --shadow: 0 10px 28px rgba(0,0,0,0.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14181A;
+    --surface:#1B2022;
+    --surface-2:#22282A;
+    --border:#343B3B;
+    --border-strong:#454D4C;
+    --text:#E9EBE4;
+    --text-muted:#A4AB9E;
+    --text-faint:#767D72;
+    --accent:#7FC1D6;
+    --accent-strong:#A6D8E8;
+    --accent-soft:#233A41;
+    --good:#7BCE9C;
+    --good-soft:#1D3327;
+    --warn:#E3B45C;
+    --warn-soft:#3A2E17;
+    --bad:#E58E7E;
+    --bad-soft:#3B241F;
+    --shadow: 0 10px 28px rgba(0,0,0,0.45);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans KR', 'Noto Sans KR', system-ui, sans-serif;
+    padding-inline:0;
+    min-height:100%;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 56px;}
+  ::selection{background:var(--accent-soft);}
+
+  .mono{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-variant-numeric:tabular-nums;}
+  .serif{font-family:'Noto Serif KR', serif;}
+
+  header.top{
+    position:sticky;
+    top:env(safe-area-inset-top,0px);
+    z-index:30;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .top-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
+  .brand .mark{
+    font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.28rem;letter-spacing:-.01em;
+  }
+  .brand .site-tag{
+    font-size:.68rem;color:var(--text-faint);letter-spacing:.08em;text-transform:uppercase;
+    border-left:1px solid var(--border-strong); padding-left:10px;
+  }
+  .search-box{
+    position:relative;flex:1;min-width:200px;max-width:520px;
+  }
+  .search-box input{
+    width:100%;padding:10px 14px 10px 38px;border-radius:9px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);font-size:.92rem;font-family:inherit;
+  }
+  .search-box input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.55;pointer-events:none;}
+  .search-box .clear-btn{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    border:none;background:none;color:var(--text-faint);cursor:pointer;padding:6px;border-radius:6px;
+    display:none;font-size:.8rem;
+  }
+  .search-box .clear-btn:hover{background:var(--surface-2);color:var(--text);}
+
+  main{padding-top:22px;}
+
+  .hero-line{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
+  .hero-line h1{font-family:'Noto Serif KR',serif;font-weight:700;font-size:1.7rem;margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
+  .hero-line p{margin:0;color:var(--text-muted);font-size:.86rem;max-width:52ch;}
+  .as-of{font-size:.72rem;color:var(--text-faint);text-align:right;white-space:nowrap;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  .stat-btn{
+    text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:10px;
+    padding:12px 14px;cursor:pointer;font-family:inherit;color:var(--text);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .stat-btn:hover{border-color:var(--border-strong);}
+  .stat-btn.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  .stat-btn .num{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;display:block;line-height:1.1;}
+  .stat-btn .lbl{font-size:.74rem;color:var(--text-muted);margin-top:3px;display:block;}
+  .stat-btn[data-status="all"] .num{color:var(--text);}
+  .stat-btn[data-status="사용중"] .num{color:var(--good);}
+  .stat-btn[data-status="단종예정"] .num{color:var(--warn);}
+  .stat-btn[data-status="단종"] .num{color:var(--bad);}
+
+  .toolbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;
+    padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  }
+  .toolbar label{font-size:.72rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .toolbar select{
+    font-family:inherit;font-size:.84rem;padding:6px 10px;border-radius:7px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);
+  }
+  .result-count{margin-left:auto;font-size:.78rem;color:var(--text-muted);}
+  .result-count b{color:var(--text);font-family:'IBM Plex Mono',monospace;}
+
+  .list-head{
+    display:none;
+    grid-template-columns: 1.5fr 3fr 1fr 1.6fr 1.3fr 1fr;
+    gap:10px;padding:8px 14px;font-size:.7rem;color:var(--text-faint);
+    text-transform:uppercase;letter-spacing:.06em;
+  }
+  .rows{display:flex;flex-direction:column;gap:8px;}
+  .row{
+    display:grid;
+    grid-template-columns: 1.5fr 3fr 1fr 1.6fr 1.3fr 1fr;
+    gap:10px;align-items:center;
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;cursor:pointer;text-align:left;font-family:inherit;color:var(--text);
+    transition:border-color .12s ease, transform .12s ease;
+  }
+  .row:hover{border-color:var(--border-strong);}
+  .row:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .row .c-code{font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-weight:500;word-break:break-all;}
+  .row .c-name{font-size:.86rem;line-height:1.35;}
+  .row .c-name .maker{color:var(--text-faint);font-size:.74rem;display:block;margin-top:2px;}
+  .row .c-pallet{font-size:.72rem;}
+  .row .c-qty{font-family:'IBM Plex Mono',monospace;font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;}
+  .row .c-pattern{font-size:.78rem;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;}
+  .row .c-status{display:flex;justify-content:flex-end;}
+
+  .lbl-mobile{display:none;font-size:.64rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    font-size:.72rem;font-weight:500;white-space:nowrap;
+  }
+  .badge.b-neutral{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);}
+  .badge.b-good{background:var(--good-soft);color:var(--good);}
+  .badge.b-warn{background:var(--warn-soft);color:var(--warn);}
+  .badge.b-bad{background:var(--bad-soft);color:var(--bad);}
+  .badge.b-accent{background:var(--accent-soft);color:var(--accent-strong);}
+
+  .qty-chip{background:var(--surface-2);border-radius:6px;padding:2px 6px;font-size:.76rem;}
+  .qty-chip .u{color:var(--text-faint);font-size:.68rem;margin-right:2px;}
+
+  .empty-state{
+    text-align:center;padding:64px 20px;color:var(--text-muted);
+  }
+  .empty-state .big{font-size:2rem;margin-bottom:8px;}
+  .empty-state button{
+    margin-top:14px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);
+    padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.84rem;
+  }
+
+  /* detail panel */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,12,10,.38);z-index:60;
+    opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+
+  .panel{
+    position:fixed;top:0;right:0;height:100%;width:420px;max-width:92vw;
+    background:var(--surface);border-left:1px solid var(--border);z-index:61;
+    box-shadow:var(--shadow);
+    transform:translateX(100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .panel.open{transform:translateX(0);}
+  .panel-inner{overflow-y:auto;padding:22px 22px 32px;flex:1;}
+  .panel-close{
+    position:absolute;top:16px;right:16px;border:none;background:var(--surface-2);color:var(--text);
+    width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .panel-close:hover{background:var(--border);}
+  .panel .p-eyebrow{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+  .panel .p-code{font-family:'IBM Plex Mono',monospace;font-size:1.05rem;font-weight:600;word-break:break-all;padding-right:40px;}
+  .panel .p-name{font-family:'Noto Serif KR',serif;font-size:1.18rem;font-weight:600;margin:8px 0 14px;line-height:1.4;text-wrap:balance;}
+  .panel .p-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+
+  .p-section{margin-bottom:18px;}
+  .p-section h3{font-size:.72rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;}
+
+  .qty-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .qty-tile{background:var(--surface-2);border-radius:10px;padding:12px 14px;border:1px solid var(--border);}
+  .qty-tile.dim{opacity:.4;}
+  .qty-tile .t-lbl{font-size:.7rem;color:var(--text-muted);}
+  .qty-tile .t-val{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;line-height:1.2;}
+  .qty-tile .t-unit{font-size:.72rem;color:var(--text-faint);}
+
+  .info-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--border);font-size:.86rem;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row .k{color:var(--text-muted);flex-shrink:0;}
+  .info-row .v{text-align:right;font-family:'IBM Plex Mono',monospace;}
+
+  .remark-box{
+    background:var(--surface-2);border-radius:10px;padding:12px 14px;font-size:.84rem;line-height:1.6;
+    white-space:pre-wrap;color:var(--text);
+  }
+  .copy-btn{
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text-muted);
+    padding:4px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;font-family:inherit;margin-left:8px;
+  }
+  .copy-btn:hover{color:var(--text);border-color:var(--accent);}
+  .copy-btn.copied{color:var(--good);border-color:var(--good);}
+
+  footer.foot{max-width:1180px;margin:36px auto 0;padding:0 20px;color:var(--text-faint);font-size:.72rem;text-align:center;}
+
+  @media (min-width:760px){
+    .list-head{display:grid;}
+    .row .c-status{justify-content:flex-start;}
+  }
+  @media (max-width:759px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .row{grid-template-columns:1fr;gap:6px;padding:14px;}
+    .row .c-status{position:absolute;top:14px;right:14px;}
+    .row{position:relative;}
+    .lbl-mobile{display:block;}
+    .row .c-qty{margin-top:2px;}
+    .panel{width:100%;max-width:100%;top:auto;bottom:0;height:88%;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;transform:translateY(100%);}
+    .panel.open{transform:translateY(0);}
+    .qty-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark">파렛트 적재 대장</span>
+      <span class="site-tag">평택센터 · 냉동/축산</span>
+    </div>
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="품번, 품명, 제조사, 비고로 검색" autocomplete="off">
+      <button class="clear-btn" id="clearSearch" type="button" aria-label="검색어 지우기">✕</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero-line">
+    <div>
+      <h1>파렛트 적재 대장</h1>
+      <p>평택센터 품목별 파렛트(N11형·N12형) 적재수량과 박스규격을 검색·조회합니다.</p>
+    </div>
+    <div class="as-of">기준일 2025.09.01 박스규격 제안 반영<br>업데이트 2026.09.09</div>
+  </div>
+
+  <div class="stats" id="statTiles"></div>
+
+  <div class="toolbar">
+    <label>파렛트타입
+      <select id="palletFilter">
+        <option value="all">전체</option>
+        <option value="N11형">N11형</option>
+        <option value="N12형">N12형</option>
+        <option value="공통(교차사용)">공통(교차사용)</option>
+        <option value="미기재">미기재</option>
+      </select>
+    </label>
+    <label>정렬
+      <select id="sortSelect">
+        <option value="no">기본순</option>
+        <option value="code">품번 가나다순</option>
+        <option value="name">품명 가나다순</option>
+        <option value="qtyDesc">적재수량 많은순</option>
+        <option value="qtyAsc">적재수량 적은순</option>
+      </select>
+    </label>
+    <span class="result-count"><b id="resultCount">0</b>건 표시 중</span>
+  </div>
+
+  <div class="list-head">
+    <span>품번</span><span>품명 / 제조사</span><span>파렛트타입</span><span>적재수량</span><span>적재기준</span><span>상태</span>
+  </div>
+
+  <div class="rows" id="rows"></div>
+
+  <div class="empty-state" id="emptyState" hidden>
+    <div class="big">🔍</div>
+    검색 조건에 맞는 품목이 없습니다.
+    <div><button id="resetBtn" type="button">필터 초기화</button></div>
+  </div>
+</main>
+
+<footer class="foot">평택센터 제품별 파렛트 적재 기준_260909.xlsx 기반 · 총 336개 품목</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="품목 상세">
+  <button class="panel-close" id="panelClose" aria-label="닫기">✕</button>
+  <div class="panel-inner" id="panelInner"></div>
+</div>
+
+<script>
+const DATA = [{"no":1,"wh":"평택","code":"SHR7-GD+","name":"(멕시카나용)빵가루새우링23G(새우40%돔10%)/OEM/GD/베","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"10*8","box":"","status":"사용중","remark":""},{"no":2,"wh":"평택","code":"PDTO2QNL+","name":"10.8KG 냉동새우살(흰다리새우,꼬리있음)16-20/QNL/베트남산","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":"에프앤티매입"},{"no":3,"wh":"평택","code":"RPD8-SWS+","name":"10KG 냉동새우살(흰다리새우)71-90/SWS/베트남산","maker":"","palletType":"N11형","n11":66,"n12":"","pattern":"","box":"","status":"사용중","remark":"11*6단 에프앤티매입"},{"no":4,"wh":"평택","code":"RPD6-QNL+","name":"10KG 생새우살(51/70)/QNL/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"5/28 변경 49->48"},{"no":5,"wh":"평택","code":"RPD15-QD","name":"200G 냉동새우살 91-110/QD/베트남산","maker":"","palletType":"N11형","n11":78,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":6,"wh":"평택","code":"RPD12-QD1","name":"200G 냉동새우살51-70/QD/베트남산","maker":"","palletType":"N11형","n11":78,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":7,"wh":"평택","code":"BL-SDA7+","name":"2KG닭정육280-300G/SADIA/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":8,"wh":"평택","code":"RPD5","name":"4KG 냉동새우살51-70/200G/베트남산","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":9,"wh":"평택","code":"CPDTO6-QD","name":"4KG 냉동자숙칵테일새우/71-90/베트남산","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":10,"wh":"평택","code":"PDTO12QNL+","name":"4KG냉동흰다리새우살41-60/QNL/베트남산(오구피자용)","maker":"","palletType":"N11형","n11":104,"n12":"","pattern":"13*8","box":"","status":"사용중","remark":""},{"no":11,"wh":"평택","code":"STS304","name":"50g사세왕새우튀김/흰다리새우30%/OEM/베트남","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":""},{"no":12,"wh":"평택","code":"NBS1-QNL+","name":"6KG냉동흰다리새우살(노바시새우,30EA/TRAY)/QNL/베트남산","maker":"","palletType":"N11형","n11":54,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":13,"wh":"평택","code":"NBS2-QNL+","name":"6KG냉동흰다리새우살(노바시새우,40EA/TRAY)/QNL/베트남산","maker":"","palletType":"N11형","n11":66,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":14,"wh":"평택","code":"SBDK2WLF+","name":"8K훈제오리슬라이스/SMOKED BONELESS SLICED/중국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"455*275*190","status":"사용중","remark":""},{"no":15,"wh":"평택","code":"PDTO7QNL+","name":"9KG냉동새우살(흰다리새우,꼬리있음)26-30/QNL/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":16,"wh":"평택","code":"PDTO8-HRG","name":"9KG냉동새우살(흰다리새우,꼬리있음)31-40/QNL/베트남산/HRG","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":17,"wh":"평택","code":"SBL-CPC+","name":"COPACOL SKINLESS BL","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":18,"wh":"평택","code":"리얼후라이드 순살치킨E2","name":"E리얼후라이드 순살치킨2/닭고기: 외국산(태국, 브라질, 미국), 국내산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"상신&이앤지 동일코드사용 / 상신6/1부터 ,이앤지 6/13부터 24개월 변경입고"},{"no":19,"wh":"평택","code":"리얼후라이드 순살치킨E","name":"E리얼후라이드순살치킨/닭고기(외국산: 태국, 브라질, 미국)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"단종","remark":"단종"},{"no":20,"wh":"평택","code":"알찬너겟국내산E","name":"E사세알찬너겟/닭고기:국내산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"단종","remark":"단종"},{"no":21,"wh":"평택","code":"사세알찬너겟E2","name":"E사세알찬너겟/닭고기:외국산(태국,브라질,미국),국내산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":"이앤지 / 7/04부터 24개월변경입고"},{"no":22,"wh":"평택","code":"WS-GFN1+","name":"GFN 윙스틱 35-50G/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":23,"wh":"평택","code":"RPD3-HRG","name":"PD 31/50 QNL/베트남/HRG","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":"에프앤티매입"},{"no":24,"wh":"평택","code":"BL-BEL+","name":"UNSIZED BELLO 닭정육/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":25,"wh":"평택","code":"BL-CAN+","name":"UNSIZED CANCAO 닭정육/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":26,"wh":"평택","code":"BL-GUB+","name":"UNSIZED GUIBON 닭정육/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":27,"wh":"평택","code":"BL-LAR+","name":"UNSIZED LAR 닭정육/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":28,"wh":"평택","code":"BL-SUF+","name":"UNSIZED SUPER FRANGO 닭정육/브라질산","maker":"","palletType":"N11형","n11":77,"n12":"","pattern":"7*11","box":"","status":"사용중","remark":""},{"no":29,"wh":"평택","code":"BL-VBR+","name":"UNSIZED VIBRA 닭정육/브라질산","maker":"","palletType":"N11형","n11":84,"n12":"","pattern":"7*12","box":"","status":"사용중","remark":""},{"no":30,"wh":"평택","code":"WS-VND+","name":"VND 윙스틱 33-55G/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":31,"wh":"평택","code":"SBB-VBR","name":"가슴살10KG/VIBRA/BR","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"5*12","box":"","status":"사용중","remark":""},{"no":32,"wh":"평택","code":"PSBF-MACS","name":"감자_시즌드배터드후라이즈(케이준)/맥케인/미국산","maker":"","palletType":"N12형","n11":"","n12":50,"pattern":"10*5","box":"","status":"사용중","remark":""},{"no":33,"wh":"평택","code":"정육염지육1200","name":"경아)정육염지육1200/브라질산","maker":"","palletType":"N12형","n11":"","n12":64,"pattern":"8*8","box":"","status":"사용중","remark":""},{"no":34,"wh":"평택","code":"찜닭염장육","name":"공사일공)찜닭염장육750/브라질산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":35,"wh":"평택","code":"치킨염지육","name":"공사일공)치킨염지육450/브라질산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":36,"wh":"평택","code":"KBMW","name":"깐부윙/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":37,"wh":"평택","code":"KBWS","name":"깐부윙스틱/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":38,"wh":"평택","code":"깐소새우V","name":"깐소새우/냉동새우살31/40 /화인/새우:베트남산","maker":"","palletType":"공통(교차사용)","n11":40,"n12":40,"pattern":"8*5","box":"","status":"사용중","remark":"파레트 교차사용"},{"no":39,"wh":"평택","code":"SBB-KAO","name":"냉동닭가슴살/UNSIZED/KAO/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":40,"wh":"평택","code":"SBB5-GLB","name":"냉동닭가슴살12KG/trimming/GLB/태국","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":41,"wh":"평택","code":"SBB-GLB1","name":"냉동닭가슴살12KG/unsized/GLB/태국","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":42,"wh":"평택","code":"SPT6-GLO+","name":"냉동브레디드새우패티65G/TMC/베트남","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":"변경 45"},{"no":43,"wh":"평택","code":"SPT1-GLO+","name":"냉동통살새우까스60G/하늘빛용/베트남","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"","box":"","status":"사용중","remark":"2026년 보세입고시 적재수량 재확인필요"},{"no":44,"wh":"평택","code":"SPT2-GLO+","name":"냉동통살새우까스80G/하늘빛용/베트남","maker":"","palletType":"N11형","n11":98,"n12":"","pattern":"14*7","box":"","status":"사용중","remark":"2026년 보세입고시 적재수량 재확인필요"},{"no":45,"wh":"평택","code":"SPT3-GD","name":"냉동통살새우패티77G/TMC/베트남","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"변경 48"},{"no":46,"wh":"평택","code":"SPT3-HHA","name":"냉동통살새우패티77G/TMC/베트남","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"변경 48"},{"no":47,"wh":"평택","code":"NBS3-QNL+","name":"노바시새우(20EA/TRAY)/QNL/베트남산","maker":"","palletType":"N11형","n11":42,"n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":48,"wh":"평택","code":"JTH3","name":"뉴매콤점보넓적다리/SPICY JUMBO THIGH 130GUP/태국","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":49,"wh":"평택","code":"JDS4","name":"뉴점보닭다리/JUMBO DRUMSTICK 130GUP/닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"일죽이고시 40박스적재로 변경요청필요"},{"no":50,"wh":"평택","code":"JWL2","name":"뉴점보통다리/NEW JUMBO WHOLE LEG/ 닭고기 : 태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":51,"wh":"평택","code":"단짠순살찜닭(제품)","name":"단짠순살찜닭/B2C/제이엠푸드/닭고기:브라질산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":52,"wh":"평택","code":"GI-PE+","name":"닭근위(GIZZARDS)/PERDIGAO/브라질산","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"5*12","box":"","status":"사용중","remark":""},{"no":53,"wh":"평택","code":"BL-PE+","name":"닭정육(S/O,UN)/PERDIGAO/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":54,"wh":"평택","code":"BL-CPC+","name":"닭정육(S/O,UN,200G+)/코파콜/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":55,"wh":"평택","code":"BL-SDA2+","name":"닭정육/SADIA/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":56,"wh":"평택","code":"도담전용 순살강정","name":"도담전용 순살강정1KG/브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"단종예정","remark":"박스사이즈변경협의완료8/07 ->단종예정"},{"no":57,"wh":"평택","code":"리얼후라이드순살치킨","name":"리얼후라이드순살치킨/닭고기:브라질산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8","box":"","status":"사용중","remark":"사용종료"},{"no":58,"wh":"평택","code":"리얼후라이드순살치킨2","name":"리얼후라이드순살치킨550G/닭고기: 브라질산","maker":"","palletType":"N12형","n11":"","n12":35,"pattern":"5*7","box":"","status":"사용중","remark":""},{"no":59,"wh":"평택","code":"마일드순살치킨꼬치브라질산","name":"마일드순살치킨꼬치100G/새롬/ 닭고기:브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":60,"wh":"평택","code":"마일드순살치킨꼬치120G(한강용)","name":"마일드순살치킨꼬치120G /새롬/닭고기:브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":61,"wh":"평택","code":"MST1","name":"마일드치킨스테이크/한솥/태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":62,"wh":"평택","code":"마일드 크런치치킨2","name":"마일드크런치치킨 닭고기:외국산(브라질,미국,태국),국산","maker":"","palletType":"공통(교차사용)","n11":" ","n12":40,"pattern":"5*8","box":"","status":"단종","remark":"변경 40 / 박스사이즈변경협의완료8/07 ->단종"},{"no":63,"wh":"평택","code":"만구만구750G(제품)","name":"만구만구750G/JDS4(2)JTH3(2)JWL(1)/달그락/태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":64,"wh":"평택","code":"FSCY-QNG+","name":"매콤닭꼬치/중국/QNG","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":65,"wh":"평택","code":"매콤로제닭갈비(제품)","name":"매콤로제닭갈비/B2C/제이엠푸드/닭고기:브라질산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":66,"wh":"평택","code":"GSCY-SYX+","name":"매콤숯불닭꼬치/중국/SYX","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":67,"wh":"평택","code":"JDS2","name":"매콤점보닭다리/SPICY JUMBO DS 130GUP/닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":68,"wh":"평택","code":"FMXW","name":"멕시카나멕시윙(후라이드)/닭고기 : 태국산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":69,"wh":"평택","code":"MXW1","name":"멕시카나멕시윙30-40G/닭고기 : 태국산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":70,"wh":"평택","code":"FTBL-VND+","name":"무뼈닭발/VANEDA/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":71,"wh":"평택","code":"GWS2S","name":"바베큐윙스틱/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":72,"wh":"평택","code":"BQST2","name":"바베큐치킨스테이크(범용)/태국","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":73,"wh":"평택","code":"CFTH1","name":"바삭매콤치킨/CRISPY FRIED SPICY THIGH 닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"일죽이고시 40박스로 변경적재요청필요 241213부터"},{"no":74,"wh":"평택","code":"CFDS1","name":"바삭통다리치킨/CRISPY FRIED DRUM STICK 태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"일죽이고시 40박스로 변경적재요청필요 241213부터"},{"no":75,"wh":"평택","code":"바삭하닭매콤간장","name":"바삭하닭통살홈치킨매콤간장/B2C/새롬/닭고기:브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":76,"wh":"평택","code":"바삭하닭크리미어니언","name":"바삭하닭통살홈치킨크리미어니언/B2C/새롬/닭고기:브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":77,"wh":"평택","code":"BWS1","name":"버팔로스틱/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":78,"wh":"평택","code":"BWS3","name":"버팔로스틱SP-GS/닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"오뚜기이고용 적재기준변경필요"},{"no":79,"wh":"평택","code":"BMW1","name":"버팔로윙/닭고기:태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":80,"wh":"평택","code":"BWS5","name":"버팔로윙봉350G/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":81,"wh":"평택","code":"BMWP","name":"버팔로윙플러스/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":82,"wh":"평택","code":"BRIB2","name":"버팔로치킨립/치킨플러스/태국","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":83,"wh":"평택","code":"버팔로치킨립300G(제품)","name":"버팔로치킨립300G/BRIB2/달그락/태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":84,"wh":"평택","code":"순살닭구이브라질산","name":"본에프디)순살닭구이 닭고기:브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"단종","remark":"박스사이즈변경협의완료8/07-->단종"},{"no":85,"wh":"평택","code":"봉먹고다리먹고","name":"봉먹고다리먹고/B2C/닭고기:국내산,태국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"4*8","box":"","status":"사용중","remark":""},{"no":86,"wh":"평택","code":"BMBS30GD","name":"브레디드빵가루멘보샤30G/FNT/새우24%)","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"12*5","box":"","status":"사용중","remark":"에프앤티매입(변경 60)"},{"no":87,"wh":"평택","code":"BFSH04GD+","name":"브레디드새우프리터/51-60/GD/베트남산","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":""},{"no":88,"wh":"평택","code":"SPT5","name":"빵가루리얼새우패티65G/베트남","maker":"","palletType":"N11형","n11":54,"n12":"","pattern":"11*4+10","box":"","status":"사용중","remark":"변경 54"},{"no":89,"wh":"평택","code":"SHR5-GD+","name":"빵가루새우링23G(새우40%돔10%)/OEM/GD/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"10*4+8","box":"","status":"사용중","remark":""},{"no":90,"wh":"평택","code":"HS451GD+","name":"빵가루점보통새우45G (새우50%)/GD/베트남산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":91,"wh":"평택","code":"HS451GLO+","name":"빵가루점보통새우45G (새우50%)/GLO/베트남산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":92,"wh":"평택","code":"플러스순살치킨","name":"사세/플러스순살치킨/닭고기:브라질산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"4*8 -> 8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241116 / 8/06부터 24개월 변경입고 / 241116 박스사이즈변경후 N11형적재입고"},{"no":93,"wh":"평택","code":"후라이드순살치킨","name":"사세/후라이드순살치킨/닭고기:브라질산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241024 / 10/10부터 24개월 변경입고/품번변경 / 241024 박스재질변경후 N11형적재입고"},{"no":94,"wh":"평택","code":"SCS303GD+","name":"사세바삭튀긴통새우튀김/30g/B2C/GD/베트남","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"12*5","box":"","status":"사용중","remark":""},{"no":95,"wh":"평택","code":"사세버팔로갈비윙봉220","name":"사세버팔로갈비윙봉220G/B2C/진천/닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"4*7 -> 8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241210 / 241210 박스사이즈변경후 N11형적재입고"},{"no":96,"wh":"평택","code":"SBWSP","name":"사세버팔로스틱플러스/SHF/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":97,"wh":"평택","code":"BMWG","name":"사세버팔로윙골드/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"변경 56"},{"no":98,"wh":"평택","code":"SBMWG","name":"사세버팔로윙골드/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":99,"wh":"평택","code":"BWS4","name":"사세버팔로윙봉220G/B2C/FFW/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":100,"wh":"평택","code":"BWS7","name":"사세버팔로윙봉220G/B2C/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":101,"wh":"평택","code":"사세버팔로윙봉갈비맛600","name":"사세버팔로윙봉갈비맛600G/B2C/진천/닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"4*8 -> 8*5","box":"","status":"사용중","remark":"N12->N11 적재변경240904 / 품번변경후 9/01부터 24개월 변경입고 / 240904 박스사이즈변경후 N11형적재입고"},{"no":102,"wh":"평택","code":"BWSG","name":"사세버팔로윙봉골드/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":103,"wh":"평택","code":"SBWSG","name":"사세버팔로윙봉골드/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":104,"wh":"평택","code":"BWSS","name":"사세버팔로윙봉매운맛/B2C/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":105,"wh":"평택","code":"BWSO","name":"사세버팔로윙봉오리지널맛/B2C/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":106,"wh":"평택","code":"사세버팔로윙봉허니맛600","name":"사세버팔로윙봉허니맛600G/B2C/진천/닭고기:태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"4*8 -> 8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241118 / 7/25부터 24개월 변경입고 / 241118 박스사이즈변경후 N11형적재입고"},{"no":107,"wh":"평택","code":"BMWO","name":"사세버팔로윙오리지널맛/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"3/27변경 56"},{"no":108,"wh":"평택","code":"SBMWP","name":"사세버팔로윙플러스/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":109,"wh":"평택","code":"STS121BBS+","name":"사세새우튀김12G(30%)/BBS/OEM/W&Y BREAD/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"4*12","box":"","status":"사용중","remark":""},{"no":110,"wh":"평택","code":"STS121GD+","name":"사세새우튀김12G(30%)/GD/OEM/W&Y BREAD/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"8/09변경"},{"no":111,"wh":"평택","code":"STS204","name":"20g사세새우튀김/흰다리새우40%/OEM/베트남","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":112,"wh":"평택","code":"STS303","name":"30g사세왕새우튀김/흰다리새우30%/OEM/베트남","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"12*5","box":"","status":"사용중","remark":""},{"no":113,"wh":"평택","code":"사세치킨가라아게","name":"사세치킨가라아게 /B2C/ 닭고기:브라질산","maker":"","palletType":"N11형","n11":28,"n12":"","pattern":"4*7","box":"","status":"사용중","remark":""},{"no":114,"wh":"평택","code":"사세치킨가라아게1000","name":"사세치킨가라아게1KG/B2C/진천/닭고기:외국산(브라질, 미국, 태국)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"4*7 -> 8*5","box":"","status":"사용중","remark":"N12->N11 적재변경250224 / 8/25부터 24개월 변경입고 / 250224 박스사이즈변경후 N11형적재입고"},{"no":115,"wh":"평택","code":"사세치킨가라아게300","name":"사세치킨가라아게300G/B2C/진천/닭고기:외국산(브라질, 미국, 태국)","maker":"","palletType":"N11형","n11":28,"n12":"","pattern":"4*7","box":"","status":"단종","remark":"단종"},{"no":116,"wh":"평택","code":"사세치킨가라아게500(뉴)","name":"사세치킨가라아게500G(뉴)/B2C/진천/닭고기:외국산(브라질, 미국,","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"4*7 ->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241004 / 241004 박스사이즈변경후 N11형적재입고"},{"no":117,"wh":"평택","code":"사세치킨가라아게500","name":"사세치킨가라아게500G/B2C/진천/닭고기:외국산(브라질, 미국, 태국)","maker":"","palletType":"N11형","n11":28,"n12":"","pattern":"4*7","box":"","status":"사용중","remark":""},{"no":118,"wh":"평택","code":"사세치킨너겟국내산","name":"사세치킨너겟/닭고기:국내산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"단종","remark":"단종"},{"no":119,"wh":"평택","code":"SN23-GLO+","name":"새우너겟/에머이/GLO/베트남","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"12*5","box":"","status":"사용중","remark":""},{"no":120,"wh":"평택","code":"샤니조각정육","name":"샤니)조각정육10KG/브라질산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8","box":"","status":"사용중","remark":""},{"no":121,"wh":"평택","code":"MCY-QNG+","name":"순살닭꼬치/중국/QNG","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":122,"wh":"평택","code":"BLK-GLB1+","name":"순살정육/BLK15-20G/GLB","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":123,"wh":"평택","code":"MBLK-GLB+","name":"순살정육/BLK18-28G/염장/GLB/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":"변경 64"},{"no":124,"wh":"평택","code":"BLK-GLB3+","name":"순살정육/BLK20-25G/GLB","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":125,"wh":"평택","code":"BLK-GLB4+","name":"순살정육/BLK25-30G/GLB","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":"8/09변경"},{"no":126,"wh":"평택","code":"BLK-GLB5","name":"순살정육/BLK30-40G/GLB","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":127,"wh":"평택","code":"MBLK2-GLB+","name":"순살정육/돕는사람들/BLK18-28G/염장/GLB/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":"변경 64"},{"no":128,"wh":"평택","code":"MBLK3-GLB+","name":"순살조각치킨/충만치킨/BLK18-28G/염장/GLB","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":129,"wh":"평택","code":"FKA4","name":"순살치킨가라게/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":130,"wh":"평택","code":"GCY-SYX+","name":"숯불닭꼬치/중국/SYX","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":131,"wh":"평택","code":"SGRS","name":"스파이시그릴스테이크/닭고기 :태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":132,"wh":"평택","code":"스파이시순살치킨꼬치브라질산","name":"스파이시순살치킨꼬치100G/새롬/닭고기:브라질산","maker":"","palletType":"공통(교차사용)","n11":" ","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":133,"wh":"평택","code":"FCT3","name":"신전떡볶이치킨텐더/신전떡복이용/닭고기:태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":134,"wh":"평택","code":"애슐리크리스피통살치킨","name":"애슐리크리스피통살치킨/닭고기:태국,미국,브라질산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":135,"wh":"평택","code":"오리지날닭가슴살스테이크","name":"오리지날닭가슴살스테이크/닭고기:국내산","maker":"","palletType":"N11형","n11":36,"n12":"","pattern":"6*6","box":"","status":"사용중","remark":""},{"no":136,"wh":"평택","code":"GWS1","name":"오리지널그릴스틱/닭고기:태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":137,"wh":"평택","code":"GMW1","name":"오리지널그릴윙/닭고기 : 태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":138,"wh":"평택","code":"윙허니맛","name":"윙허니맛/B2C/닭고기:태국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"4*8","box":"","status":"사용중","remark":""},{"no":139,"wh":"평택","code":"유가네통닭다리살스테이크양념구이215G-B(제품)","name":"유가네통닭다리살스테이크양념규이215G-B/브라질산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":140,"wh":"평택","code":"WL-SDA+","name":"장각/SADIA/브라질","maker":"","palletType":"공통(교차사용)","n11":60,"n12":60,"pattern":"5*12","box":"","status":"사용중","remark":""},{"no":141,"wh":"평택","code":"BL-AR+","name":"정육(S/D,UN)/AURORA/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":142,"wh":"평택","code":"P-정육편육브라질산","name":"정육편육/닭고기: 브라질산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"소비기한18개월 / 박스사이즈변경불가8/07"},{"no":143,"wh":"평택","code":"조각정육브라질산","name":"조각정육/닭고기:브라질산/사세일반","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":144,"wh":"평택","code":"청양고추근위튀김","name":"청양고추근위튀김/B2C/새롬/닭고기:브라질산","maker":"","palletType":"N12형","n11":"","n12":48,"pattern":"8*6","box":"","status":"사용중","remark":""},{"no":145,"wh":"평택","code":"치즈불닭구이(제품)","name":"치즈불닭구이/B2C/제이엠푸드/닭고기:브라질산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":146,"wh":"평택","code":"치킨너겟","name":"치킨너겟/닭고기:국내산/KFC전용","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"단종","remark":"단종"},{"no":147,"wh":"평택","code":"FCT1","name":"치킨텐더/닭고기:태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":148,"wh":"평택","code":"칼슘깐쇼새우","name":"칼슘깐쇼새우(71/90)/화인/새우:베트남산","maker":"","palletType":"공통(교차사용)","n11":" ","n12":40,"pattern":"8*5","box":"","status":"단종예정","remark":"2026년3월 단종예정"},{"no":149,"wh":"평택","code":"TBBC 순살정육","name":"코리안바베큐)TBBC순살정육800G/닭고기:브라질산","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":150,"wh":"평택","code":"크리스피치킨가라아게","name":"크리스피치킨가라아게/새롬/닭고기:브라질산","maker":"","palletType":"공통(교차사용)","n11":" ","n12":48,"pattern":"8*6","box":"","status":"사용중","remark":""},{"no":151,"wh":"평택","code":"CPWS","name":"크리스피치킨봉/홈플러스/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"일죽이고시 적재수량 변경필요/260609 입고건 56박스적재확인"},{"no":152,"wh":"평택","code":"CPMW","name":"크리스피치킨윙/홈플러스/닭고기 : 태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":153,"wh":"평택","code":"MCY2-QNG","name":"통살치킨꼬치 마일드/중국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":154,"wh":"평택","code":"FSCY2-QNG","name":"통살치킨꼬치 매콤/중국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":155,"wh":"평택","code":"CRFC1","name":"통살 치킨/CRUNCH FRIED CHICKEN/ 닭고기 : 태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":156,"wh":"평택","code":"SPT5-F","name":"통새우살카츠65G 베트남","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"","box":"","status":"사용중","remark":"에프앤티매입"},{"no":157,"wh":"평택","code":"TS313-F","name":"통새우튀김 30G(33%)/베트남","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"12*5","box":"","status":"사용중","remark":"에프앤티매입"},{"no":158,"wh":"평택","code":"TS313TTO","name":"통새우튀김 30G(33%)/베트남/TTO","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"12*5","box":"","status":"사용중","remark":"에프앤티매입"},{"no":159,"wh":"평택","code":"DM-HFKA01","name":"할머니바삭순살치킨/(주)나도람FC/닭고기:브라질산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":160,"wh":"평택","code":"HMW3","name":"핫미들윙2KG/태국산/홈플러스","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":161,"wh":"평택","code":"HWS3","name":"핫윙스틱2KG/태국산/홈플러스","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":162,"wh":"평택","code":"HCP1","name":"핫치킨패티/태국산/던킨","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"변경 40"},{"no":163,"wh":"평택","code":"HJDS1","name":"핫할라피뇨치킨/HOT JALAPENO CHICKEN/닭고기:태국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":"변경 32"},{"no":164,"wh":"평택","code":"해리닭똥집후라이드","name":"해리닭똥집후라이드(근위)/새롬/닭고기:브라질산","maker":"","palletType":"공통(교차사용)","n11":" ","n12":48,"pattern":"8*6","box":"","status":"사용중","remark":"변경 48 / 23.7월 박스사이즈변경"},{"no":165,"wh":"평택","code":"HS45-F","name":"헤드온통새우튀김45G(새우50%) 베트남","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":"변경 45"},{"no":166,"wh":"평택","code":"HS50GLO","name":"헤드온통새우튀김50G(새우43%) 베트남","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":"변경 45"},{"no":167,"wh":"평택","code":"마일드순살정육600","name":"현인)마일드순살정육600/브라질산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":168,"wh":"평택","code":"후라이드근위1KG","name":"후라이드근위/닭고기:브라질산/새롬","maker":"","palletType":"N12형","n11":"","n12":48,"pattern":"8*6","box":"","status":"사용중","remark":"6/09부터 24개월 변경입고"},{"no":169,"wh":"평택","code":"후라이드근위플러스","name":"후라이드근위플러스/닭고기:브라질산/새롬","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":170,"wh":"평택","code":"SHR6-F","name":"후라이드새우링23g(새우40% 돔10%) 베트남","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":"에프앤티매입"},{"no":171,"wh":"평택","code":"SHR6-GD+","name":"후라이드새우링23G(새우40%돔10%)/OEM/GD/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"10*4+8","box":"","status":"사용중","remark":""},{"no":172,"wh":"평택","code":"SBDK-WLF+","name":"훈제통오리완포9K/SMOKED BONELESS WHOLE DUCK/중국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"450*270*200","status":"사용중","remark":""},{"no":173,"wh":"평택","code":"사세치킨너겟E2","name":"E사세치킨너겟/닭고기:외국산(태국,브라질,미국),국내산","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"사용중","remark":""},{"no":174,"wh":"평택","code":"SBB-GLB2","name":"냉동닭가슴살12KG/trimming/GLB/태국","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":175,"wh":"평택","code":"SBB-CPP","name":"냉동닭가슴살/UNSIZED/CENTACO/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":176,"wh":"평택","code":"BLK-GLB2+","name":"순살정육/BLK18-23G/GLB","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":177,"wh":"평택","code":"MW-KAO","name":"MIDDLE WING 35-45G/태국산/RAW/KAONA","maker":"","palletType":"N11형","n11":63,"n12":"","pattern":"9*7","box":"","status":"사용중","remark":""},{"no":178,"wh":"평택","code":"WS-SUN","name":"윙스틱40-55G/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":179,"wh":"평택","code":"SJ-FHCP01","name":"프랭크핫치킨패티/프랭크F&B/닭고기(태국산)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8 ->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경240926 / 240926 박스사이즈변경후 N11형적재입고"},{"no":180,"wh":"평택","code":"DM-OFKA01","name":"오리지날순살치킨가라아게/닭고기(외국산:브라질,미국,태국산 등)","maker":"","palletType":"N12형","n11":"","n12":48,"pattern":"8*6","box":"","status":"사용중","remark":"새롬"},{"no":181,"wh":"평택","code":"DO-FJWS01","name":"후라이드점보스틱/프랭크F&B/닭고기(태국산)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"달그락"},{"no":182,"wh":"평택","code":"DM-CFKA01","name":"크리스피치킨가라아게/닭고기(외국산:브라질,미국,태국산 등)","maker":"","palletType":"공통(교차사용)","n11":48,"n12":48,"pattern":"8*6","box":"","status":"사용중","remark":"260812 부터 n11로 변경 / 6/09부터 24개월 변경입고"},{"no":183,"wh":"평택","code":"SCS304","name":"사세바삭튀긴왕새우튀김45G/베트남산","maker":"","palletType":"N11형","n11":45,"n12":"","pattern":"9*5","box":"","status":"사용중","remark":"2/29변경 9*5 / 박스사이즈 변경 GHS522/GHS526/GHS527 입고분부터 2/29확인 (기존) 40.5 x 25 x 29.5 cm ▶ (변경) 40.5 x 25 x 27.5 cm"},{"no":184,"wh":"평택","code":"SJ-CRFC01","name":"통순살치킨/닭고기(태국산)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8 ->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경240927 / 240927 박스사이즈변경후 N11형적재입고"},{"no":185,"wh":"평택","code":"BPDTO","name":"왕새우강정35G/그남자네/새우(베트남산)","maker":"","palletType":"N11형","n11":52,"n12":"","pattern":"13*4","box":"","status":"사용중","remark":"9/23변경 / 기존 12*5/1빠"},{"no":186,"wh":"평택","code":"SPCS","name":"스파이시치킨통살스테이크/화락/FFW/태국산","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":187,"wh":"평택","code":"DM-MW-PNS01","name":"미들윙/UNSIZED/PANUS/태국산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":188,"wh":"평택","code":"SFWS","name":"SF크리스피치킨봉/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":189,"wh":"평택","code":"SFMW","name":"SF크리스피치킨윙/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":190,"wh":"평택","code":"DM-SCWSDG300","name":"사세쏘스치킨윙봉단짠갈릭300/B2C/닭고기:외국산(태국산)","maker":"","palletType":"N11형","n11":36,"n12":"","pattern":"4*9","box":"","status":"사용중","remark":"4/19 상신32변경입고"},{"no":191,"wh":"평택","code":"DM-SCWSDG560","name":"사세쏘스치킨윙봉단짠갈릭560/B2C/닭고기:외국산(태국산)","maker":"","palletType":"N11형","n11":36,"n12":"","pattern":"4*9","box":"","status":"사용중","remark":"4/19 상신32변경입고"},{"no":192,"wh":"평택","code":"DM-SCBLKDG375","name":"사세쏘스치킨순살단짠갈릭375/B2C/닭고기:외국산(태국,브라질,미국등)","maker":"","palletType":"N11형","n11":36,"n12":"","pattern":"4*9","box":"","status":"사용중","remark":"4/19 상신32변경입고"},{"no":193,"wh":"평택","code":"DM-SCBLKDG590","name":"사세쏘스치킨순살단짠갈릭590/B2C/닭고기:외국산(태국,브라질,미국등)","maker":"","palletType":"N11형","n11":36,"n12":"","pattern":"4*9","box":"","status":"사용중","remark":"4/19 상신32변경입고"},{"no":194,"wh":"평택","code":"FKWS","name":"후라이드킹스틱/태국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":195,"wh":"평택","code":"SJ-BCBLT01","name":"사세)본컷편육10KG/닭고기(브라질산)","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"빨강색라벨로 정육편육과구분"},{"no":196,"wh":"평택","code":"SHSDS","name":"맵단 닭다리(세븐일레븐용)/HOT&SWEET DS/태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"일죽이고시 40박스로 변경적재요청필요 241213부터"},{"no":197,"wh":"평택","code":"BSS80GD","name":"통살새우스틱80G/세븐일레븐용/GD/베트남","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"4/26 변경 8*7 / 씨제이동탄 8*6 (150CM 높이제한)"},{"no":198,"wh":"평택","code":"FJWS","name":"후라이드점보스틱/프랭크/태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"10/23 변경 8*6->8*5"},{"no":199,"wh":"평택","code":"DM-BNBB450","name":"사세바삭한치킨너겟450/B2C/닭고기(태국산,국내산)","maker":"","palletType":"공통(교차사용)","n11":" ","n12":35,"pattern":"5*7","box":"","status":"사용중","remark":"N11->N12 적재변경250404 / 250404  5*7단으로 변경입고(N12형적재)"},{"no":200,"wh":"평택","code":"SPT10","name":"통살새우패티100G/베트남산","maker":"","palletType":"N11형","n11":50,"n12":"","pattern":"10*5","box":"","status":"사용중","remark":"4/29 변경 10*5"},{"no":201,"wh":"평택","code":"DM-SBGMW1000","name":"사세버팔로윙골드1000/B2C/닭고기:외국산(태국,리투아니아,브라질 등)","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"6*6 ->8*6","box":"","status":"사용중","remark":"N12->N11 적재변경250124 / 6/19부터 24개월 변경입고 / 250124 박스사이즈변경후 N11형적재입고"},{"no":202,"wh":"평택","code":"CJCS","name":"케이준치킨스틱/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"범용판매예정"},{"no":203,"wh":"평택","code":"SJ-CJCN01","name":"케이준크런치치킨/닭고기{외국산(브라질,미국,태국 등),국내산}","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241209 / 241209 박스사이즈변경후 N11형적재입고"},{"no":204,"wh":"평택","code":"BL-GLB2+","name":"GLB 정육 220-240G/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":205,"wh":"평택","code":"SBDK3-WLF","name":"사세맛있는훈제오리슬라이스400/B2C/WLF/중국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":206,"wh":"평택","code":"HS501","name":"빵가루점보통새우50G/베트남산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":207,"wh":"평택","code":"SJ-GRBLK01","name":"그릴드닭구이/본아이에프/닭고기(브라질산)","maker":"","palletType":"공통(교차사용)","n11":40,"n12":" ","pattern":"8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241125 / 품번변경후8/21부터 24개월변경입고 / 241125 박스사이즈변경후 N11형적재입고"},{"no":208,"wh":"평택","code":"BL-LEVO","name":"정육(SKIN-ON)/UNSIZED/LEVO/브라질산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":209,"wh":"평택","code":"SSWS","name":"쏜살윙스틱/GS/태국산","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":""},{"no":210,"wh":"평택","code":"SJ-SSCN01","name":"사세치킨너겟/닭고기:외국산(태국,브라질,미국),국내산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8 ->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경240919 / 240919 박스사이즈변경후 N11형적재입고"},{"no":211,"wh":"평택","code":"촉촉순살치킨","name":"촉촉순살치킨/닭고기:외국산(브라질,태국,미국)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8 ->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241104 / 7/28부터 24개월 변경입고 / 241104 박스사이즈변경후 N11형적재입고"},{"no":212,"wh":"평택","code":"FHMW","name":"후라이드하프미들윙/태국산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":213,"wh":"평택","code":"SJ-BBQBLK01","name":"바베큐용닭다리살/닭고기(브라질산)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"5*8 ->8*5","box":"","status":"사용중","remark":"N12->N11 적재변경241028 / 7/07부터 24개월변경입고 / 241028 박스사이즈변경후 N11형적재입고"},{"no":214,"wh":"평택","code":"SJ-SBMWMH310","name":"버팔로윙마일드허니310/B2C/닭고기:외국산(태국,리투아니아,브라질등)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"윙허니맛 대체품/박스사이즈변경후 첫입고상품 240705"},{"no":215,"wh":"평택","code":"SJ-YPFKA01","name":"육즙팡팡순살가라아게/SPC/닭고기(외국산:브라질,태국,미국등)","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"박스사이즈변경 협의완료 9/26"},{"no":216,"wh":"평택","code":"BL-CVALE","name":"정육(SKIN-ON)/UNSIZED/CVALE/브라질산","maker":"","palletType":"N11형","n11":84,"n12":"","pattern":"7*12","box":"","status":"사용중","remark":""},{"no":217,"wh":"평택","code":"SBWSO820","name":"사세버팔로윙봉오리지널맛820G/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":218,"wh":"평택","code":"SBMWO820","name":"사세버팔로윙오리지널맛820G/B2C/태국산","maker":"","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":219,"wh":"평택","code":"SCSHR23GD","name":"사세빠삭한새우링23G/B2C/베트남산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":220,"wh":"평택","code":"SBWSO330","name":"사세버팔로윙봉오리지널맛330G/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":221,"wh":"평택","code":"NBPDTO","name":"브레디드새우강정/베트남산","maker":"","palletType":"N11형","n11":"32 ->36","n12":"","pattern":"8*4 -> 9*4","box":"","status":"사용중","remark":"적재기준변경260623"},{"no":222,"wh":"평택","code":"SJ-BSCP01","name":"BS통다리살치킨패티/보승에프씨/닭고기(태국산)","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"단종","remark":"박스사이즈& 입수량 변경으로 단종확인->SJ-BSCP02"},{"no":223,"wh":"평택","code":"SBMBS30GD","name":"빵가루멘보샤30G/베트남산","maker":"","palletType":"N11형","n11":60,"n12":"","pattern":"12*5","box":"","status":"사용중","remark":""},{"no":224,"wh":"평택","code":"MW1-CPP","name":"미들윙/MW30-45G/CENTACO/태국산","maker":"","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":""},{"no":225,"wh":"평택","code":"빽쿡 순살치킨가라게","name":"빽쿡 순살치킨가라게/닭고기: 태국산","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"7/08부터 24개월변경입고 / 240709 박스사이즈변경 KLB. AK. KLB(A) /440*315*245 /재질변경 추가확인중"},{"no":226,"wh":"평택","code":"BHOTS","name":"노랑통새우튀김43G/노랑푸드/베트남산","maker":"","palletType":"N11형","n11":24,"n12":"","pattern":"4*6","box":"","status":"사용중","remark":"품명변경요청240923"},{"no":227,"wh":"평택","code":"CBPDTO","name":"크리스피새우강정/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"12*4","box":"","status":"사용중","remark":""},{"no":228,"wh":"평택","code":"SJ-SBBQBLK01","name":"슬로우캘리전용닭다리살/더슬로우컴퍼니/닭고기(브라질산)","maker":"","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"박스사이즈변경확인중?"},{"no":229,"wh":"평택","code":"MW-VP","name":"냉동미들윙/UNSIZED/VP/리투아니아산","maker":"","palletType":"공통(교차사용)","n11":" ","n12":45,"pattern":"5*9","box":"","status":"사용중","remark":""},{"no":230,"wh":"평택","code":"SPWL","name":"매콤점보통다리/태국산","maker":"","palletType":"N11형","n11":"40->32 ","n12":"","pattern":"8*5->8*4","box":"","status":"사용중","remark":"코리아세븐전용/ 오뚜기이고시 32박스로 변경적재필요"},{"no":231,"wh":"평택","code":"BSPT","name":"빵가루통살새우패티80G/베트남산","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":232,"wh":"평택","code":"SJ-CRSB180","name":"사세특수부위치킨립숯불향바비큐맛180/B2C/닭고기(태국산)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"소비기한2년"},{"no":233,"wh":"평택","code":"SJ-WBCP01","name":"왓더버거통다리살패티/닭고기(태국산)","maker":"","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":234,"wh":"평택","code":"DM-SSCN01","name":"G사세치킨너겟/닭고기{(외국산:태국,브라질,미국등),국내산}","maker":"금화","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"6/13 24개월 변경입고"},{"no":235,"wh":"평택","code":"SJ-BSCP02","name":"BS통다리살치킨패티/닭고기(태국산)","maker":"","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":"SJ-BSCP01 입수량변경품 , 260822 원산지 변경예정 브라질산"},{"no":236,"wh":"평택","code":"SBDK4WLF","name":"포케올데이훈제오리슬라이스/중국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"전용상품"},{"no":237,"wh":"평택","code":"PDTO14QNL","name":"생칵테일새우-꼬리있음(31/40)/QNL/베트남","maker":"","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":238,"wh":"평택","code":"BWS8","name":"사세버팔로윙봉180G/B2C/태국산","maker":"","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":""},{"no":239,"wh":"평택","code":"SJ-CKBLK500","name":"사세치킨가라아게500/B2C/닭고기(외국산:태국,브라질,미국 등)","maker":"사세","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"7/02 24개월 변경입고 / 사세치킨가라아게500 입수변경품"},{"no":240,"wh":"평택","code":"냉동새우살71/90","name":"10KG 벌크냉동새우살71/90 베트남산","maker":"동주매입","palletType":"N11형","n11":50,"n12":"","pattern":"(8*6)+2","box":"","status":"사용중","remark":""},{"no":241,"wh":"평택","code":"RPD2-QNL+","name":"QNL벌크냉동새우살(흰다리새우)71-90/베트남산","maker":"FNT","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":242,"wh":"평택","code":"DM-CSPC01","name":"컵스_팝콘치킨/닭고기(태국산)","maker":"이앤지","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"전용상품(코리아세븐)"},{"no":243,"wh":"평택","code":"SJ-SBGWS180","name":"버팔로갈비윙봉180/B2C/닭고기:태국산","maker":"사세","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"소비기한2년"},{"no":244,"wh":"평택","code":"SJ-MSFKA01","name":"촉촉순살치킨/명랑시대/닭고기(외국산:브라질,태국,미국)","maker":"사세","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"전용상품"},{"no":245,"wh":"평택","code":"DM-SBGWS1000","name":"사세버팔로윙봉골드1000/B2C/닭고기:외국산(태국,브라질,덴마크등)","maker":"한맥","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"소비기한2년 / 소비기한 정정 2025.04.09"},{"no":246,"wh":"평택","code":"SJ-SBMDMWSDS410","name":"봉먹고다리먹고410/B2C/닭고기(봉:태국산,닭다리:리투아니아산)","maker":"사세","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"9/12부터 24개월 변경입고 / 봉먹고다리먹고410 입수변경품"},{"no":247,"wh":"평택","code":"SJ-SOMBLK5000","name":"정육편육5KG/닭다리살(브라질산)","maker":"사세","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":""},{"no":248,"wh":"평택","code":"SJ-SBMWMH310R","name":"버팔로윙마일드허니310/B2C/닭고기:외국산(태국,리투아니아,브라질 등)","maker":"사세","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*320*220","status":"사용중","remark":"7/21부터 24개월 변경입고 / 버팔로윙마일드허니310 입수변경품"},{"no":249,"wh":"평택","code":"DM-PADBLM900","name":"포케올데이구운닭다리살900/네오에프앤비/닭고기(태국산)","maker":"한맥","palletType":"공통(교차사용)","n11":40,"n12":"40 -> 30","pattern":"8*5->6*5->8*5","box":"","status":"사용중","remark":"소비기한2년 / N12형-->N11형 30박스 변경적재->박스변경후 40박스로적재변경 N11형"},{"no":250,"wh":"평택","code":"DM-SBJBW1000","name":"사세버팔로점보윙골드1000/B2C/닭고기:브라질산","maker":"한맥","palletType":"N11형","n11":40,"n12":"","pattern":"8*6->8*5","box":"","status":"사용중","remark":"소비기한2년 / 적재단수변경요청"},{"no":251,"wh":"평택","code":"DM-BNBB450R","name":"사세바삭한치킨너겟450/B2C/닭고기(태국산, 국내산)","maker":"금화","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"24개월 변경예정 / 사세바삭한치킨너겟 입수변경품/기존품 소진시까지 박스테이프 투명색으로 입고하여 기존품과 구분예정"},{"no":252,"wh":"평택","code":"DM-NPKA01","name":"뉴플러스순살치킨/닭고기(브라질산)","maker":"금화","palletType":"N12형","n11":"","n12":42,"pattern":"6*7","box":"","status":"단종","remark":"gs도시락단종품 재사용확인"},{"no":253,"wh":"평택","code":"SBWSO330R","name":"사세버팔로윙봉오리지널맛330G/B2C/태국산","maker":"수입","palletType":"N11형","n11":80,"n12":"","pattern":"8*10","box":"","status":"사용중","remark":"사세버팔로윙봉오리지널맛330G 입수변경품"},{"no":254,"wh":"평택","code":"5PDS70","name":"5마리브레디드꼬치가왔새우/베트남산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":255,"wh":"평택","code":"PDTOS35","name":"통브레디드꼬치가왔새우/베트남산","maker":"수입","palletType":"N11형","n11":40,"n12":"","pattern":"10*5->8*5","box":"","status":"사용중","remark":"cj납품시 3단적재로 변경납품필요"},{"no":256,"wh":"평택","code":"DM-BJGWS400","name":"사세버팔로직화그릴윙봉400/B2C/닭고기:외국산(태국,브라질,폴란드등)","maker":"한맥","palletType":"공통(교차사용)","n11":56,"n12":48,"pattern":"8*6->8*7","box":"","status":"사용중","remark":"소비기한2년 / 다음입고시  N12형-->N11형 적재예정 /미담 홈쇼핑전용/진천인하우스로 변경예정"},{"no":257,"wh":"평택","code":"DM-BCKBLK300-2B","name":"사세바삭한치킨가라아게300(2EA)/B2C/닭고기:브라질","maker":"원일","palletType":"N12형","n11":"","n12":40,"pattern":"8*5","box":"","status":"단종","remark":"소비기한2년 / KLB175.S.S.K.K(B.B) 다음입고시 재질변경필요/단종확정 2026.05.12"},{"no":258,"wh":"평택","code":"FRRP","name":"롤리폴리팟새우꼬치/베트남산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"12*4","box":"","status":"사용중","remark":"cj납품시 적재변경후 납품필요"},{"no":259,"wh":"평택","code":"FPOS","name":"새우랑대파만낫스틱/베트남산","maker":"수입","palletType":"N11형","n11":60,"n12":"","pattern":"10*6","box":"","status":"사용중","remark":"cj납품시 적재변경후 납품필요"},{"no":260,"wh":"평택","code":"FBSP40","name":"오동통살40미니새우패티/베트남산","maker":"수입","palletType":"N11형","n11":40,"n12":"","pattern":"10*4","box":"","status":"사용중","remark":"cj납품시 적재변경후 납품필요"},{"no":261,"wh":"평택","code":"FBSP42","name":"오동통살42새우패티/베트남산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"cj납품시 적재변경후 납품필요"},{"no":262,"wh":"평택","code":"ABMW1","name":"올데이버팔로윙/OEM/태국산","maker":"수입","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":"샤브올데이 전용상품"},{"no":263,"wh":"평택","code":"ABWS1","name":"올데이버팔로윙스틱/OEM/태국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"샤브올데이 전용상품"},{"no":264,"wh":"평택","code":"SJDS","name":"사세간편한점보닭다리매콤한맛/B2C/태국산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":""},{"no":265,"wh":"평택","code":"AFKA4","name":"올데이순살치킨/중국산","maker":"수입","palletType":"N11형","n11":"48 ->56","n12":"","pattern":"8*6 -> 8*7","box":"430*280*230-->규격변경중 450*300*200","status":"사용중","remark":"샤브올데이 전용상품/외박스규격변경 25/10/17 입고시부터 박스변경"},{"no":266,"wh":"평택","code":"CFBC","name":"바삭순살치킨/중국산","maker":"수입","palletType":"N11형","n11":"48 ->56","n12":"","pattern":"8*6 -> 8*7","box":"430*280*230-->규격변경중 450*300*200","status":"사용중","remark":"박스규격변경/변경시점 공유 / 26년 5월 입고건부터 외박스 규격변경후 입고/오뚜기이고시 56박스 적재량 변경후 이동필요"},{"no":267,"wh":"평택","code":"SJ-BONBLK1000","name":"그릴드닭구이1000/본아이에프/닭고기:외국산(브라질,태국,미국)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"440*315*235","status":"사용중","remark":"8/19생산부터 소비기한 24개월변경 / SJ-GRBLK01 원산지변경으로품번변경"},{"no":268,"wh":"평택","code":"BL-VND","name":"2KG순살정육/UNSZIED/VND/태국산","maker":"수입","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":269,"wh":"평택","code":"SJ-DMDS500","name":"옛날통닭다리만먹고500/B2C/닭고기(외국산:리투아니아,폴란드,핀란드등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*320*220","status":"사용중","remark":""},{"no":270,"wh":"평택","code":"SJ-SBWSG600","name":"사세버팔로윙봉갈비맛600G/B2C/닭고기:외국산(태국,폴란드,브라질등)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"원산지변경 품번변경 / 사세버팔로윙봉갈비맛600 원산지변경으로 품번변경"},{"no":271,"wh":"평택","code":"BL2-GLB","name":"2KG순살정육/BLUNSZIED/GLB/태국산","maker":"수입","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":""},{"no":272,"wh":"평택","code":"DM-SBGMW1000R","name":"사세버팔로윙골드1000/B2C/닭고기:외국산(리투아니아,폴란드,브라질등)","maker":"한맥","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"원산지변경 품번변경 / DM-SBGMW1000 원산지변경으로 품번변경"},{"no":273,"wh":"평택","code":"NFSQS","name":"오징어스틱/베트남산","maker":"수입","palletType":"N11형","n11":72,"n12":"","pattern":"9*8","box":"360*320*170","status":"사용중","remark":"노랑푸드전용으로 변경확인/251013"},{"no":274,"wh":"평택","code":"SJ-BMDMWSDS410","name":"봉먹고다리먹고410/B2C/닭고기:외국산(태국,리투아니아,폴란드등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*320*220","status":"사용중","remark":"원산지변경 품번변경 / SJ-SBMDMWSDS410 원산지변경으로 품번변경"},{"no":275,"wh":"평택","code":"BCWL","name":"더큰바삭통다리치킨/GS용/지퍼백/태국산","maker":"수입","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"이마트사용예정분/사용취소 / 오뚜기 이고시 단수조절필요 32박스"},{"no":276,"wh":"평택","code":"DM-SBGWS1000R","name":"사세버팔로윙봉골드1000/B2C/닭고기:외국산(태국,폴란드,브라질등)","maker":"한맥","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"원산지변경 품번변경 / DM-SBGWS1000 원산지변경으로 품번변경"},{"no":277,"wh":"평택","code":"SJ-FSBLK1000","name":"후라이드순살치킨1000/닭고기:외국산(브라질, 태국, 미국)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"원산지변경 품번변경 / 후라이드순살치킨 원산지변경으로 품번변경"},{"no":278,"wh":"평택","code":"SJ-SBBQBLK01R","name":"슬로우캘리닭다리살1000/닭고기(외국산:브라질,태국,미국 등)","maker":"진천","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"원산지변경 품번변경 / SJ-SBBQBLK01 원산지변경으로 품번변경/외박스사이즈변경없음"},{"no":279,"wh":"평택","code":"SJ-BBQBLK01R","name":"바베큐용닭다리살1000/닭고기{외국산(브라질,태국,미국 등)}","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"원산지변경 품번변경 / SJ-BBQBLK01 원산지변경으로 품번변경"},{"no":280,"wh":"평택","code":"CFKA4","name":"크리스피순살가라아게/중국산","maker":"수입","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"430*280*230  -->변경확인 455*305*175","status":"사용중","remark":"소비기한18개월 / B2B범용/외박스사이즈변경건 입고완료"},{"no":281,"wh":"평택","code":"CFCT1","name":"크리스피치킨텐더/중국산","maker":"수입","palletType":"N11형","n11":"48 ->56","n12":"","pattern":"8*6 ->8*7","box":"430*280*230  -->변경확인 445*305*210","status":"사용중","remark":"소비기한18개월/적재수량변경260430 / B2B범용/외박스사이즈변경건 입고완료"},{"no":282,"wh":"평택","code":"DM-PDTO31/40-01","name":"냉동흰다리새우살/31-40/베트남산","maker":"매입","palletType":"N11형","n11":"50->48","n12":"","pattern":"8*6+2 ->8*6","box":"","status":"사용중","remark":""},{"no":283,"wh":"평택","code":"SJ-SBWSH600","name":"사세버팔로윙봉허니맛600G/B2C/닭고기:외국산(태국,폴란드,브라질등)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"450*300*285","status":"사용중","remark":"원산지변경 품번변경 / 사세버팔로윙봉허니맛600 원산지변경으로 품번변경"},{"no":284,"wh":"평택","code":"YFCH","name":"요리하다방과후후라이드닭꼬치매콤한맛/중국산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"387*337*220","status":"사용중","remark":"소비기한12개월 / 롯데마트PB"},{"no":285,"wh":"평택","code":"YFCM","name":"요리하다방과후후라이드닭꼬치마일드/중국산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"387*337*220","status":"사용중","remark":"소비기한12개월 / 롯데마트PB"},{"no":286,"wh":"평택","code":"SPDK","name":"사세북경오리/중국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"470*290*190","status":"사용중","remark":"소비기한11개월"},{"no":287,"wh":"평택","code":"SFCM","name":"SF크런치윙/태국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"신세계푸드전용"},{"no":288,"wh":"평택","code":"SFCS","name":"SF크런치봉/태국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"신세계푸드전용"},{"no":289,"wh":"평택","code":"SJ-BNBB450","name":"사세바삭한치킨너겟450/B2C/닭고기:외국산(태국산,국내산)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*320*220","status":"사용중","remark":"DM-BNBB450 인하우스로 변경품"},{"no":290,"wh":"평택","code":"DM-MGCYC220","name":"MGC양념치킨220/닭고기(외국산:브라질,태국,미국 등)","maker":"상신/원일","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"450*300*300","status":"사용중","remark":"소비기한12개월 / 실제적재높이 169로 입출고시파손우려 / 메카커피전용 (220G*40BAG)"},{"no":291,"wh":"평택","code":"SJ-RFBLK1000","name":"리얼후라이드순살치킨1000/F1/닭고기:외국산(브라질,태국,미국 등)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"450*300*250","status":"사용중","remark":""},{"no":292,"wh":"평택","code":"SJ-CKKBLK1000","name":"크리스피치킨가라아게1000/F1/닭고기:외국산(태국,브라질,미국 등)","maker":"진천","palletType":"N11형","n11":"40->48","n12":"","pattern":"8*5 ->8*6","box":"440*315*235","status":"사용중","remark":"2026.03.05 적재단수 변경요청->10일 입고부터 변경"},{"no":293,"wh":"평택","code":"생새우살31/40","name":"생새우살31/40/베트남산","maker":"매입","palletType":"N11형","n11":"50->48","n12":"","pattern":"8*6+2 ->8*6","box":"","status":"사용중","remark":"평택이고시 변경적재"},{"no":294,"wh":"평택","code":"SCCL","name":"사세더바삭한통닭다리/태국산","maker":"수입","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"B2C용 컬리&자사몰만 운영"},{"no":295,"wh":"평택","code":"SJ-CKBLK300","name":"사세치킨가라아게300/B2C/닭고기(외국산:태국,브라질,미국 등)","maker":"진천","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"450*320*180","status":"사용중","remark":"30입->14입 입수변경품 / 8단적재시 높이165/측면튀어나옴/재질변경이슈 / B2C용 (롯데마트, GS 프레시 등)"},{"no":296,"wh":"평택","code":"SJ-FKBMWO1000","name":"직화K-버팔로윙1000/닭고기:외국산(리투아니아,폴란드,브라질 등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*300*230","status":"사용중","remark":"B2B제품->온라인으로 변경 확인3/31"},{"no":297,"wh":"평택","code":"SJ-FKBWSO1000","name":"직화K-버팔로스틱1000/닭고기:외국산(리투아니아,폴란드,브라질 등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*300*230","status":"사용중","remark":"B2B제품->온라인으로 변경 확인3/31"},{"no":298,"wh":"평택","code":"SJ-SBGWS280","name":"사세버팔로윙봉골드280/B2C/닭고기:외국산(태국,폴란드,브라질 등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*300*220 ->440*300*150","status":"사용중","remark":"외박스규격변경확인중2026/5/11 / B2C제품 ->외박스변경시점확인필요"},{"no":299,"wh":"평택","code":"SJ-SBGMW255","name":"사세버팔로윙골드255/B2C/닭고기:외국산(리투아니아,폴란드,브라질 등)","maker":"진천","palletType":"N11형","n11":"48->72","n12":"","pattern":"8*6->8*9","box":"450*300*220 ->440*300*150","status":"사용중","remark":"260812 입고건부터 외박스규격변경 / B2C제품 ->외박스변경시점확인"},{"no":300,"wh":"평택","code":"TWBC","name":"토핑용순살치킨/태국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"굽네치킨전용 4월 8일 평택입고"},{"no":301,"wh":"평택","code":"SJ-SBGWS1000","name":"사세버팔로윙봉골드1000/B2C/닭고기:외국산(태국,폴란드,브라질등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"B2C제품/DM-SBGWS1000R 인하우스변경품/ 출고시점확인중/6월 2일 부터 마켓컬리사용확인"},{"no":302,"wh":"평택","code":"SJ-GSFFMM840","name":"닭다리살너겟/닭고기{(다릿살(브라질),가슴살(태국),닭껍질(국내산)}","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"GS25 전용상품"},{"no":303,"wh":"평택","code":"BLCK","name":"순살치킨K/중국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"파레트포함높이165cm / 이랜드전용"},{"no":304,"wh":"평택","code":"SJ-SFBL5000","name":"사세)정육필렛염지육5000/닭고기{외국산(브라질,태국,미국)}","maker":"진천","palletType":"공통(교차사용)","n11":" ","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"20KG(5KGX4BAG)/BOX"},{"no":305,"wh":"평택","code":"SJ-SFBL5000N","name":"사세)정육필렛염지육5000/닭고기{외국산(브라질,태국,미국)}","maker":"진천","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":"10KG(5KGX2BAG)/BOX/SJ-SFBL5000 입수변경품"},{"no":306,"wh":"평택","code":"SBDKP-WLF","name":"훈제통오리완포플러스/중국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"B2B전용 고려부두입고"},{"no":307,"wh":"평택","code":"SBDKP2-WLF","name":"2KG훈제오리슬라이스플러스/중국산","maker":"수입","palletType":"N11형","n11":"56->80","n12":"","pattern":"8*7->8*10","box":"","status":"사용중","remark":"6/23 평택입고시 적재기준변경 / B2B전용 고려부두입고"},{"no":308,"wh":"평택","code":"SBDKP3-WLF","name":"800G훈제오리슬라이스플러스/중국산","maker":"수입","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"B2B전용 고려부두입고"},{"no":309,"wh":"평택","code":"SJ-ANBB1000","name":"사세알찬너겟1000/닭고기:외국산(태국산,국내산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"이앤지 사세알찬너겟E2 진천인하우스 변경 -> 4/30 입고"},{"no":310,"wh":"평택","code":"DM-DGJBLKSS440","name":"매콤달콤닭강정440/B2C/닭고기:외국산(태국,브라질,미국등)","maker":"상신","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"450*320*220","status":"사용중","remark":"소비기한12개월 / 40박스->48박스 변경요청 / 온라인 전채널 (440G*16BAG)/5월6일 입고"},{"no":311,"wh":"평택","code":"SJ-KBMWO1000","name":"K-버팔로윙1000/닭고기:외국산(리투아니아,폴란드,브라질 등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"B2B 채널 內 피자 FC, 델리, 기타 외식"},{"no":312,"wh":"평택","code":"SJ-KBWSO1000","name":"K-버팔로스틱1000/닭고기:외국산(폴란드,태국,브라질 등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"B2B 채널 內 피자 FC, 델리, 기타 외식"},{"no":313,"wh":"평택","code":"DS-DB","name":"10KG북채90-110G/DB/폴란드산","maker":"수입","palletType":"공통(교차사용)","n11":70,"n12":70,"pattern":"5*14","box":"","status":"사용중","remark":""},{"no":314,"wh":"평택","code":"MW1-DB","name":"10KG미들윙28-48G/DB/폴란드산","maker":"수입","palletType":"공통(교차사용)","n11":60,"n12":60,"pattern":"5*12","box":"","status":"사용중","remark":""},{"no":315,"wh":"평택","code":"DS3-VP","name":"5KG북채90-110G/VP/리투아니아산","maker":"수입","palletType":"공통(교차사용)","n11":60,"n12":60,"pattern":"5*12","box":"","status":"사용중","remark":""},{"no":316,"wh":"평택","code":"MW1-VP","name":"미들윙/UNSIZED/VP/리투아니아산","maker":"수입","palletType":"공통(교차사용)","n11":60,"n12":60,"pattern":"5*12","box":"","status":"사용중","remark":""},{"no":317,"wh":"평택","code":"SJ-BSWSB1000","name":"바베큐스틱1000/닭고기(브라질산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"이마트전용상품/오뚜기 이고"},{"no":318,"wh":"평택","code":"SJ-BJWB1000","name":"바베큐2조인트윙1000/닭고기(브라질산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"이마트전용상품/오뚜기 이고"},{"no":319,"wh":"평택","code":"SJ-BSWSBMC1000","name":"바베큐스틱염지육/닭고기(브라질산)","maker":"진천","palletType":"N12형","n11":"","n12":40,"pattern":"5*8","box":"","status":"사용중","remark":"이마트)바베큐스틱 부적합품 발생으로 인한 신품번 등록/무지박스에 라벨처리"},{"no":320,"wh":"평택","code":"SJ-FHCPBLS1200","name":"프랭크핫치킨패티/프랭크F&B/닭고기(브라질산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"B2B 프랭크에프앤비 전용"},{"no":321,"wh":"평택","code":"SJ-PKBLO900","name":"포케올데이구운닭다리살900/닭고기(태국산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"DM-PADBLM900  진천인하우스 변경품"},{"no":322,"wh":"평택","code":"SJ-MJSBLKS300","name":"사세매콤점보순살치킨/B2C/닭고기(브라질산)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"B2C 범용"},{"no":323,"wh":"평택","code":"SJ-SBGMW1000","name":"사세버팔로윙골드1000/B2C/닭고기:외국산(리투아니아,폴란드,브라질등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"B2C제품/DM-SBGMW1000R 인하우스변경품"},{"no":324,"wh":"평택","code":"SJ-CMMC1300","name":"충만양념육1.3KG/닭고기{외국산(브라질,태국,미국)}","maker":"진천","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"MBLK3-GLB  후속품/A골 박스 찌그러짐 발생. \r\n기존 박스(총 1,940ea) 소진 후 BB골로 변경 예정."},{"no":325,"wh":"평택","code":"SJ-KBTWSO1000","name":"K-버팔로스틱Ⅱ1000/닭고기:외국산(태국, 폴란드, 브라질 등)","maker":"진천","palletType":"N11형","n11":48,"n12":"","pattern":"8*6","box":"","status":"사용중","remark":"SJ-KBWSO1000 35~50G 윙봉과 이원화/ 유럽 윙스틱(50~65g) 활용, 외박스 블랙바탕에 투명상품명 표기로 구분"},{"no":326,"wh":"평택","code":"SJ-TSCBLKO1100","name":"통순살치킨1100/닭고기(브라질산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"프랭크)핫치킨패티 비규격품"},{"no":327,"wh":"평택","code":"SJ-NNMC1400","name":"냠냠순살염지육1.4KG/닭고기{외국산(브라질,태국,미국)}","maker":"진천","palletType":"N11형","n11":"48->64","n12":"","pattern":"8*6->8*8","box":"","status":"사용중","remark":"외박스 변경시점 9/04 입고시부터 / SPC(냠냠푸드)/오준섭 / 15T까지 무지박스 48박스 적재후 전용박스 64박스 적재로 전환예정"},{"no":328,"wh":"평택","code":"SJ-CNBB1000","name":"사세치킨너겟1000/닭고기(태국산,국내산)","maker":"진천","palletType":"N11형","n11":40,"n12":"","pattern":"8*5","box":"","status":"사용중","remark":"금화 DM-SSCN01 사세치킨너겟 인하우스 변경 ->SJ-SSCN01 원산지 변경으로 신품번 생성"},{"no":329,"wh":"평택","code":"SJ-SSCBLKO1200","name":"시그니쳐순살치킨1200/레드버튼/닭고기(외국산:브라질,태국,미국 등)","maker":"진천","palletType":"N11형","n11":32,"n12":"","pattern":"8*4","box":"","status":"사용중","remark":"레드버튼전용상품 /김사랑"},{"no":330,"wh":"평택","code":"SJ-SKBLKO450","name":"순살가라아게450/피자앤컴퍼니/닭고기(태국산)","maker":"진천","palletType":"N11형","n11":56,"n12":"","pattern":"8*7","box":"","status":"사용중","remark":"피자앤컴퍼니(반올림피자) 전용상품/김사랑"},{"no":331,"wh":"평택","code":"SJ-CPMC1400","name":"CP뉴순살정육1.4KG/치킨플러스/닭고기(브라질산)","maker":"진천","palletType":"N11형","n11":64,"n12":"","pattern":"8*8","box":"","status":"사용중","remark":"홀딩핸즈앤코 /남사로 입고창고 지정"},{"no":332,"wh":"평택","code":"SJ-RFSBLO1200","name":"라이징FS통다리살패티1200/왓더버거/닭고기(외국산:브라질,태국,미국)","maker":"진천","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":"기존 SJ-WBCP01 왓더버거통다리살패티의 제품명과 원산지 변경"},{"no":333,"wh":"평택","code":"FPP","name":"파인애플패티/베트남산","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":334,"wh":"평택","code":"PYSR","name":"파인애플짜조/베트남산","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":335,"wh":"평택","code":"GNSR","name":"잡채짜조/베트남산","maker":"","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":""},{"no":336,"wh":"평택","code":"SJ-FKBWSO1000R","name":"직화K-버팔로스틱1000/닭고기:외국산(태국, 폴란드, 브라질 등)","maker":"진천","palletType":"미기재","n11":"","n12":"","pattern":"","box":"","status":"사용중","remark":"SJ-FKBWSO1000 원산지변경으로 외박스 변경없음/ 기존품 소진후 선입선출"}];
+
+DATA.forEach(d => {
+  const parseQty = v => {
+    if (v === '' || v === null || v === undefined) return null;
+    const n = parseInt(String(v).replace(/[^0-9-]/g,''), 10);
+    return Number.isFinite(n) ? n : null;
+  };
+  d.qtyN11 = parseQty(d.n11);
+  d.qtyN12 = parseQty(d.n12);
+  d.n11Raw = d.n11 === '' || d.n11 === undefined ? null : String(d.n11).trim();
+  d.n12Raw = d.n12 === '' || d.n12 === undefined ? null : String(d.n12).trim();
+  const vals = [d.qtyN11, d.qtyN12].filter(v => v !== null);
+  d.repQty = vals.length ? Math.max(...vals) : null;
+
+  const m = String(d.pattern||'').match(/(\d+)\s*\*\s*(\d+)(?!.*\d\s*\*\s*\d)/);
+  d.patternCalc = m ? (parseInt(m[1],10) * parseInt(m[2],10)) : null;
+  d.patternDisplay = d.pattern ? d.pattern.replace(/\*/g, '×') : '';
+
+  d.boxDisplay = d.box ? d.box.replace(/\*/g, ' × ') + ' mm' : '';
+  d.search = [d.code, d.name, d.maker, d.remark, d.status].join(' ').toLowerCase();
+});
+
+const state = { q:'', status:'all', pallet:'all', sort:'no' };
+
+const STATUS_ORDER = ['all','사용중','단종예정','단종'];
+const STATUS_LABEL = { all:'전체', '사용중':'사용중', '단종예정':'단종예정', '단종':'단종' };
+
+function statusBadgeClass(s){
+  if (s === '사용중') return 'b-good';
+  if (s === '단종예정') return 'b-warn';
+  if (s === '단종') return 'b-bad';
+  return 'b-neutral';
+}
+
+const statTilesEl = document.getElementById('statTiles');
+function renderStatTiles(){
+  const counts = { all: DATA.length, '사용중':0, '단종예정':0, '단종':0 };
+  DATA.forEach(d => { counts[d.status] = (counts[d.status]||0) + 1; });
+  statTilesEl.innerHTML = STATUS_ORDER.map(s => `
+    <button class="stat-btn ${state.status===s?'active':''}" data-status="${s}" type="button">
+      <span class="num mono">${counts[s]||0}</span>
+      <span class="lbl">${STATUS_LABEL[s]}</span>
+    </button>
+  `).join('');
+  statTilesEl.querySelectorAll('.stat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.status = btn.dataset.status;
+      render();
+    });
+  });
+}
+
+function qtyChipsHTML(d){
+  const chips = [];
+  if (d.qtyN11 !== null) chips.push(`<span class="qty-chip"><span class="u">N11</span>${d.n11Raw}</span>`);
+  if (d.qtyN12 !== null) chips.push(`<span class="qty-chip"><span class="u">N12</span>${d.n12Raw}</span>`);
+  if (!chips.length) return '<span style="color:var(--text-faint)">–</span>';
+  return chips.join(' ');
+}
+
+const rowsEl = document.getElementById('rows');
+const emptyStateEl = document.getElementById('emptyState');
+const resultCountEl = document.getElementById('resultCount');
+
+function getFiltered(){
+  let list = DATA.filter(d => {
+    if (state.status !== 'all' && d.status !== state.status) return false;
+    if (state.pallet !== 'all' && d.palletType !== state.pallet) return false;
+    if (state.q && !d.search.includes(state.q)) return false;
+    return true;
+  });
+  const bySort = {
+    no: (a,b) => a.no - b.no,
+    code: (a,b) => a.code.localeCompare(b.code, 'ko'),
+    name: (a,b) => a.name.localeCompare(b.name, 'ko'),
+    qtyDesc: (a,b) => (b.repQty ?? -1) - (a.repQty ?? -1),
+    qtyAsc: (a,b) => (a.repQty ?? 9999) - (b.repQty ?? 9999),
+  };
+  list.sort(bySort[state.sort] || bySort.no);
+  return list;
+}
+
+function render(){
+  renderStatTiles();
+  const list = getFiltered();
+  resultCountEl.textContent = list.length;
+
+  if (!list.length){
+    rowsEl.innerHTML = '';
+    emptyStateEl.hidden = false;
+    return;
+  }
+  emptyStateEl.hidden = true;
+
+  rowsEl.innerHTML = list.map(d => `
+    <button class="row" data-code="${escapeAttr(d.code)}" type="button">
+      <span class="c-code mono">${escapeHtml(d.code)}</span>
+      <span class="c-name">
+        ${escapeHtml(d.name)}
+        ${d.maker ? `<span class="maker">${escapeHtml(d.maker)}</span>` : ''}
+      </span>
+      <span class="c-pallet">
+        <span class="lbl-mobile">파렛트타입</span>
+        <span class="badge b-accent">${d.palletType}</span>
+      </span>
+      <span class="c-qty">
+        <span class="lbl-mobile">적재수량</span>
+        ${qtyChipsHTML(d)}
+      </span>
+      <span class="c-pattern">
+        <span class="lbl-mobile">적재기준</span>
+        ${d.patternDisplay ? d.patternDisplay + (d.patternCalc ? ` (${d.patternCalc})` : '') : '–'}
+      </span>
+      <span class="c-status">
+        <span class="badge ${statusBadgeClass(d.status)}">${d.status}</span>
+      </span>
+    </button>
+  `).join('');
+
+  rowsEl.querySelectorAll('.row').forEach(btn => {
+    btn.addEventListener('click', () => openPanel(btn.dataset.code));
+  });
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+// search
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearch');
+searchInput.addEventListener('input', () => {
+  state.q = searchInput.value.trim().toLowerCase();
+  clearSearchBtn.style.display = state.q ? 'block' : 'none';
+  render();
+});
+clearSearchBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  state.q = '';
+  clearSearchBtn.style.display = 'none';
+  searchInput.focus();
+  render();
+});
+
+document.getElementById('palletFilter').addEventListener('change', e => {
+  state.pallet = e.target.value; render();
+});
+document.getElementById('sortSelect').addEventListener('change', e => {
+  state.sort = e.target.value; render();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  state.q=''; state.status='all'; state.pallet='all'; state.sort='no';
+  searchInput.value=''; document.getElementById('palletFilter').value='all'; document.getElementById('sortSelect').value='no';
+  clearSearchBtn.style.display='none';
+  render();
+});
+
+// detail panel
+const overlay = document.getElementById('overlay');
+const panel = document.getElementById('panel');
+const panelInner = document.getElementById('panelInner');
+const panelClose = document.getElementById('panelClose');
+
+function openPanel(code){
+  const d = DATA.find(x => x.code === code);
+  if (!d) return;
+  panelInner.innerHTML = `
+    <div class="p-eyebrow">${escapeHtml(d.wh)}센터 · No.${d.no}</div>
+    <div class="p-code mono">${escapeHtml(d.code)}
+      <button class="copy-btn" id="copyCodeBtn" type="button">품번 복사</button>
+    </div>
+    <div class="p-name">${escapeHtml(d.name)}</div>
+    <div class="p-badges">
+      <span class="badge ${statusBadgeClass(d.status)}">${d.status}</span>
+      <span class="badge b-accent">${d.palletType}</span>
+      ${d.maker ? `<span class="badge b-neutral">${escapeHtml(d.maker)}</span>` : ''}
+    </div>
+
+    <div class="p-section">
+      <h3>파렛트타입별 적재수량</h3>
+      <div class="qty-grid">
+        <div class="qty-tile ${d.qtyN11===null?'dim':''}">
+          <div class="t-lbl">N11형 (1100×1100)</div>
+          <div class="t-val mono">${d.n11Raw ?? '–'}</div>
+          <div class="t-unit">box / pallet</div>
+        </div>
+        <div class="qty-tile ${d.qtyN12===null?'dim':''}">
+          <div class="t-lbl">N12형 (1200×1000)</div>
+          <div class="t-val mono">${d.n12Raw ?? '–'}</div>
+          <div class="t-unit">box / pallet</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-section">
+      <h3>적재 상세</h3>
+      <div class="info-row"><span class="k">적재기준</span><span class="v">${d.patternDisplay ? d.patternDisplay + (d.patternCalc?` = ${d.patternCalc}box`:'') : '–'}</span></div>
+      <div class="info-row"><span class="k">박스규격</span><span class="v">${d.boxDisplay || '–'}</span></div>
+      <div class="info-row"><span class="k">창고</span><span class="v">${escapeHtml(d.wh)}</span></div>
+      <div class="info-row"><span class="k">제조사</span><span class="v">${d.maker ? escapeHtml(d.maker) : '–'}</span></div>
+    </div>
+
+    ${d.remark ? `
+    <div class="p-section">
+      <h3>비고</h3>
+      <div class="remark-box">${escapeHtml(d.remark)}</div>
+    </div>` : ''}
+  `;
+
+  const copyBtn = document.getElementById('copyCodeBtn');
+  copyBtn.addEventListener('click', () => {
+    try {
+      navigator.clipboard.writeText(d.code).then(()=>{
+        copyBtn.textContent = '복사됨';
+        copyBtn.classList.add('copied');
+        setTimeout(()=>{ copyBtn.textContent='품번 복사'; copyBtn.classList.remove('copied'); }, 1500);
+      }).catch(()=>{});
+    } catch(e){}
+  });
+
+  overlay.classList.add('open');
+  panel.classList.add('open');
+  document.addEventListener('keydown', onKeydown);
+}
+
+function closePanel(){
+  overlay.classList.remove('open');
+  panel.classList.remove('open');
+  document.removeEventListener('keydown', onKeydown);
+}
+function onKeydown(e){ if (e.key === 'Escape') closePanel(); }
+
+overlay.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
+
+render();
+</script>
