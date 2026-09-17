@@ -127,6 +127,14 @@
   }
   .search-box .clear-btn:hover{background:var(--surface-2);color:var(--text);}
 
+  .upload-open-btn{
+    display:flex;align-items:center;gap:6px;flex-shrink:0;
+    background:var(--accent);color:#fff;border:none;border-radius:8px;
+    padding:9px 14px;font-family:inherit;font-size:.82rem;font-weight:500;cursor:pointer;
+  }
+  .upload-open-btn:hover{background:var(--accent-strong);}
+  .upload-open-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
   main{padding-top:22px;}
 
   .hero-line{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;}
@@ -267,6 +275,42 @@
 
   footer.foot{max-width:1180px;margin:36px auto 0;padding:0 20px;color:var(--text-faint);font-size:.72rem;text-align:center;}
 
+  /* upload modal */
+  .upload-modal{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);
+    width:420px;max-width:calc(100vw - 32px);
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    box-shadow:var(--shadow);z-index:71;padding:22px;
+    opacity:0;pointer-events:none;transition:opacity .16s ease, transform .16s ease;
+  }
+  .upload-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+  .upload-modal h2{font-family:'Noto Serif KR',serif;font-size:1.1rem;margin:0 0 4px;}
+  .upload-modal .sub{font-size:.8rem;color:var(--text-muted);margin:0 0 18px;line-height:1.5;}
+  .upload-modal .drop{
+    border:1.5px dashed var(--border-strong);border-radius:10px;padding:22px 14px;text-align:center;
+    cursor:pointer;font-size:.84rem;color:var(--text-muted);transition:border-color .12s ease, background .12s ease;
+  }
+  .upload-modal .drop:hover, .upload-modal .drop.drag{border-color:var(--accent);background:var(--accent-soft);}
+  .upload-modal .drop strong{color:var(--text);}
+  .upload-modal .file-name{margin-top:10px;font-size:.8rem;font-family:'IBM Plex Mono',monospace;color:var(--text);word-break:break-all;}
+  .upload-modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+  .upload-modal button.btn{
+    font-family:inherit;font-size:.84rem;padding:8px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--text);
+  }
+  .upload-modal button.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .upload-modal button.btn.primary:disabled{opacity:.5;cursor:default;}
+  .upload-modal button.btn:hover:not(:disabled){filter:brightness(0.96);}
+  .upload-modal .status-msg{margin-top:14px;font-size:.82rem;line-height:1.6;border-radius:8px;padding:10px 12px;display:none;}
+  .upload-modal .status-msg.show{display:block;}
+  .upload-modal .status-msg.ok{background:var(--good-soft);color:var(--good);}
+  .upload-modal .status-msg.err{background:var(--bad-soft);color:var(--bad);}
+  .upload-modal .status-msg.busy{background:var(--surface-2);color:var(--text-muted);}
+  .upload-modal .m-close{
+    position:absolute;top:14px;right:14px;border:none;background:var(--surface-2);color:var(--text);
+    width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.9rem;
+  }
+
   @media (min-width:760px){
     .list-head{display:grid;}
     .row .c-status{justify-content:flex-start;}
@@ -296,6 +340,10 @@
       <input id="searchInput" type="text" placeholder="품번, 품명, 제조사, 비고로 검색" autocomplete="off">
       <button class="clear-btn" id="clearSearch" type="button" aria-label="검색어 지우기">✕</button>
     </div>
+    <button class="upload-open-btn" id="uploadOpenBtn" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+      데이터 업데이트
+    </button>
   </div>
 </header>
 
@@ -355,6 +403,23 @@
   <div class="panel-inner" id="panelInner"></div>
 </div>
 
+<div class="overlay" id="uploadOverlay"></div>
+<div class="upload-modal" id="uploadModal" role="dialog" aria-modal="true" aria-label="상품 마스터 업데이트">
+  <button class="m-close" id="uploadClose" aria-label="닫기">✕</button>
+  <h2>상품 마스터 업데이트</h2>
+  <p class="sub">평택센터 파렛트 적재 기준 원본 엑셀(.xlsx)을 올리면 전체 품목 데이터가 이 파일 내용으로 즉시 교체됩니다.</p>
+  <label class="drop" id="dropZone" for="fileInput">
+    <div>📄 <strong>클릭해서 파일 선택</strong> 또는 이 영역에 드래그</div>
+    <div class="file-name" id="fileNameText" hidden></div>
+  </label>
+  <input type="file" id="fileInput" accept=".xlsx" hidden>
+  <div class="status-msg" id="uploadStatus"></div>
+  <div class="actions">
+    <button class="btn" id="uploadCancelBtn" type="button">취소</button>
+    <button class="btn primary" id="uploadSubmitBtn" type="button" disabled>업데이트 적용</button>
+  </div>
+</div>
+
 <script>
 let DATA = [];
 let loadError = false;
@@ -390,7 +455,7 @@ async function loadData(){
   const asOfEl = document.getElementById('asOfText');
   const footEl = document.getElementById('footText');
   try {
-    const res = await fetch('./products.json', { cache: 'no-store' });
+    const res = await fetch('/api/products', { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const lastMod = res.headers.get('last-modified');
     DATA = await res.json();
@@ -623,6 +688,114 @@ function onKeydown(e){ if (e.key === 'Escape') closePanel(); }
 
 overlay.addEventListener('click', closePanel);
 panelClose.addEventListener('click', closePanel);
+
+// upload modal
+const uploadOpenBtn = document.getElementById('uploadOpenBtn');
+const uploadOverlay = document.getElementById('uploadOverlay');
+const uploadModal = document.getElementById('uploadModal');
+const uploadClose = document.getElementById('uploadClose');
+const uploadCancelBtn = document.getElementById('uploadCancelBtn');
+const uploadSubmitBtn = document.getElementById('uploadSubmitBtn');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileNameText = document.getElementById('fileNameText');
+const uploadStatus = document.getElementById('uploadStatus');
+
+let selectedFile = null;
+
+function setStatus(kind, text){
+  uploadStatus.className = 'status-msg show ' + kind;
+  uploadStatus.textContent = text;
+}
+function clearStatus(){
+  uploadStatus.className = 'status-msg';
+  uploadStatus.textContent = '';
+}
+
+function setSelectedFile(file){
+  if (!file) return;
+  if (!/\.xlsx$/i.test(file.name)) {
+    setStatus('err', 'xlsx 파일만 업로드할 수 있습니다.');
+    return;
+  }
+  selectedFile = file;
+  fileNameText.hidden = false;
+  fileNameText.textContent = file.name;
+  uploadSubmitBtn.disabled = false;
+  clearStatus();
+}
+
+function openUploadModal(){
+  uploadOverlay.classList.add('open');
+  uploadModal.classList.add('open');
+  document.addEventListener('keydown', onUploadKeydown);
+}
+function closeUploadModal(){
+  uploadOverlay.classList.remove('open');
+  uploadModal.classList.remove('open');
+  document.removeEventListener('keydown', onUploadKeydown);
+  selectedFile = null;
+  fileInput.value = '';
+  fileNameText.hidden = true;
+  uploadSubmitBtn.disabled = true;
+  uploadSubmitBtn.textContent = '업데이트 적용';
+  clearStatus();
+}
+function onUploadKeydown(e){ if (e.key === 'Escape') closeUploadModal(); }
+
+uploadOpenBtn.addEventListener('click', openUploadModal);
+uploadClose.addEventListener('click', closeUploadModal);
+uploadCancelBtn.addEventListener('click', closeUploadModal);
+uploadOverlay.addEventListener('click', closeUploadModal);
+
+fileInput.addEventListener('change', () => setSelectedFile(fileInput.files[0]));
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  const file = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (file) setSelectedFile(file);
+});
+
+function arrayBufferToBase64(buf){
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+uploadSubmitBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  uploadSubmitBtn.disabled = true;
+  uploadSubmitBtn.textContent = '업로드 중…';
+  setStatus('busy', '파일을 읽고 데이터를 반영하는 중입니다…');
+
+  try {
+    const buf = await selectedFile.arrayBuffer();
+    const base64 = arrayBufferToBase64(buf);
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: selectedFile.name, base64 }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) throw new Error(json.error || '업로드에 실패했습니다.');
+
+    setStatus('ok', `업데이트 완료 · 총 ${json.counts.total}건 (사용중 ${json.counts.active} / 단종예정 ${json.counts.planned} / 단종 ${json.counts.discontinued})`);
+    uploadSubmitBtn.textContent = '완료';
+    await loadData();
+    setTimeout(closeUploadModal, 1400);
+  } catch (e) {
+    setStatus('err', e.message || '업로드 중 오류가 발생했습니다.');
+    uploadSubmitBtn.disabled = false;
+    uploadSubmitBtn.textContent = '업데이트 적용';
+  }
+});
 
 loadData();
 </script>

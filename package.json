@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/tlaalsxosim-cyber/sase-1#readme",
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "xlsx-js-style": "^1.2.0"
   }
 }
